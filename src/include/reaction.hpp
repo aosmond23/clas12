@@ -87,7 +87,7 @@ class Reaction {
   inline float weight() {
     // if (is_gen_data || is_rec_data) {
       // --- use for sim data ---
-      return _data->mc_weight() / 1e4; // ***** search mc_weight and edit that / 1e4 too   
+      return _data->mc_weight(); // / 1e4; // ***** search mc_weight and edit that / 1e4 too   
     // } else if (is_exp_data) {
      // --- use for exp data ---
       // return 1.0;
@@ -229,7 +229,7 @@ class MCReaction : public Reaction {
   void SetMCElec();
   void CalcMissMass_mc();
 
-  inline float weight() { return _data->mc_weight() / 1e4; }
+  inline float weight() { return _data->mc_weight(); } // / 1e4; }
   inline float W_mc() { return _W_mc; }
   inline float Q2_mc() { return _Q2_mc; }
   inline float MM2_exclusive_mc() const { return _MM2_exclusive_mc; }
