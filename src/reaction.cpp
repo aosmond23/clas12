@@ -497,7 +497,7 @@ MCReaction::MCReaction(const std::shared_ptr<Branches12> &data, float beam_energ
 
   _beam = std::make_unique<TLorentzVector>();
   _beam_energy = beam_energy;
-  _weight_mc = _data->mc_weight() * 1e4;
+  _weight_mc = _data->mc_weight(); // * 1e4; dont need this anymore!! twopeg update in late dec 2025 seems to work with increased precision!
   _beam->SetPxPyPzE(0.0, 0.0, sqrt(_beam_energy * _beam_energy - MASS_E * MASS_E), _beam_energy);
 
   _gamma_mc = std::make_unique<TLorentzVector>();
