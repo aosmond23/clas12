@@ -25,7 +25,7 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
   size_t num_of_events = (int)_chain->GetEntries();
 
   // Determine the beam energy from the environment variable
-  float beam_energy = 24.0;
+  float beam_energy = 10.6;
   if (getenv("BEAM_E") != NULL) beam_energy = atof(getenv("BEAM_E"));
 
   // Determine the data processing type (gen, rec, or exp) based on output filename

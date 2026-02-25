@@ -8,12 +8,21 @@
 #include "branches.hpp"
 #include "constants.hpp"
 #include "physics.hpp"
+#include <cstdlib>
 
 class Reaction {
  protected:
   std::shared_ptr<Branches12> _data;
 
-  double _beam_energy = 10.6041;
+  double _beam_energy = 10.6041; // default beam energy
+
+  Reaction() {
+      const char* env = std::getenv("BEAM_E");
+      if (env) {
+          _beam_energy = std::atof(env);
+      }
+  }
+
   std::string _data_type;
   // double _beam_energy = beam_energy;
   std::unique_ptr<TLorentzVector> _beam;
