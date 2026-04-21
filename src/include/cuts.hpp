@@ -35,7 +35,7 @@ class Pass2_Cuts : public Cuts
     bool IsPim(int i);
 
     // bool CC_nphe_cut();
-    bool DC_fiducial_cut_XY(int i, int pid);s
+    bool DC_fiducial_cut_XY(int i, int pid);
     bool EC_sampling_fraction_cut();
     bool PCAL_minimum_energy();
     bool PCAL_fiducial_cut_HX_HY();
