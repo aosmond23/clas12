@@ -96,10 +96,10 @@ class Reaction {
   inline float weight() {
     // if (is_gen_data || is_rec_data) {
       // --- use for sim data ---
-      return _data->mc_weight(); // / 1e4; // ***** search mc_weight and edit that / 1e4 too   
+      // return _data->mc_weight(); // / 1e4; // ***** search mc_weight and edit that / 1e4 too   
     // } else if (is_exp_data) {
      // --- use for exp data ---
-      // return 1.0;
+      return 1.0;
     // }
     // return 0.0;
   }
