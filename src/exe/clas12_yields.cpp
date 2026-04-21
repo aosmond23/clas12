@@ -13,7 +13,13 @@ int main(int argc, char** argv) {
         // Make sure we don't create more threads than files
         int NUM_THREADS = 4;
         if (getenv("NUM_THREADS") != NULL) NUM_THREADS = atoi(getenv("NUM_THREADS"));
-        if (NUM_THREADS > argc - NUM_THREADS) NUM_THREADS = 1;
+        // if (NUM_THREADS > argc - NUM_THREADS) NUM_THREADS = 1;
+
+        int num_inputs = argc - 2; // argv[0]=program, argv[1]=output file
+
+        if (NUM_THREADS > num_inputs) {NUM_THREADS = num_inputs;}
+
+        if (NUM_THREADS < 1) {NUM_THREADS = 1;}
 
         // Make a vector of vectors of strings the size of the number of threads
         std::vector<std::vector<std::string> > infilenames(NUM_THREADS);
@@ -26,7 +32,9 @@ int main(int argc, char** argv) {
                 // Set the output type based on the output filename; 9/5/24
                 csv_data::setOutputType(outfilename);
                 // All other files are split evently by the under of threads
-                for (int i = 2; i < argc; i++) infilenames[i % NUM_THREADS].push_back(argv[i]);
+                // for (int i = 2; i < argc; i++) infilenames[i % NUM_THREADS].push_back(argv[i]);
+                int t = 0;
+                for (int i = 2; i < argc; i++) {infilenames[t].push_back(argv[i]); t = (t + 1) % NUM_THREADS;}
         } else {
                 return 1;
         }

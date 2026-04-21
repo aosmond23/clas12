@@ -53,6 +53,8 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
   std::cout << "=============== " << MAGENTA << "Thread " << thread_id << DEF << " =============== " << BLUE
             << num_of_events << " Events " << DEF << "===============\n";
 
+  // std::cout << "Thread " << thread_id << " processing " << num_of_events << " events on " << std::this_thread::get_id() << std::endl;
+
   // Make a data object which all the branches can be accessed from
   // auto data = is_gen_data || is_rec_data ? std::make_shared<Branches12>(_chain, true) : std::make_shared<Branches12>(_chain);
   auto data = (is_gen_data || is_rec_data) 
@@ -73,6 +75,11 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
     if (thread_id == 0 && current_event % 1000 == 0)
       std::cout << "\t" << (100 * current_event / num_of_events) << " %\r" << std::flush;
       
+    // if (current_event % 1000 == 0)
+    //   std::cout << "Thread " << thread_id
+    //             << " " << (100 * current_event / num_of_events)
+    //             << " %\n";
+
       // ----- Process Generated Data -----
       if (is_gen_data) {
         // ----- Generated reaction class -----

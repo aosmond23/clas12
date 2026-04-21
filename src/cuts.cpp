@@ -274,7 +274,15 @@ bool Pass2_Cuts::DC_fiducial_cut_XY(int i, int pid)
                               {62.403, 63.254, 63.941, 63.396, 63.273, 62.715}};
 
         // identify sector where particle was detected
-        short dc_sector = (_data->dc_sec(i) - 1);
+        // short dc_sector = (_data->dc_sec(i) - 1);
+
+        int raw_sector = _data->dc_sec(i);
+
+        if (raw_sector <= 0 || raw_sector > 6) {
+            return false;
+        }
+
+        short dc_sector = raw_sector - 1;
 
         // region 1
         double X1 = _data->dc_r1_x(i);
@@ -380,7 +388,15 @@ bool Pass2_Cuts::PCAL_fiducial_cut_HX_HY()
 
   double min_radius[6] = {71.245, 71.587, 72.142, 73.101, 72.025, 72.921};
 
-  short pcal_sector = (_data->ec_pcal_sec(0) - 1);
+  // short pcal_sector = (_data->ec_pcal_sec(0) - 1);
+
+  int raw_sector = _data->ec_pcal_sec(0);
+
+  if (raw_sector <= 0 || raw_sector > 6) {
+      return false;
+  }
+
+  short pcal_sector = raw_sector - 1;
 
   double HX = _data->ec_pcal_hx(0);
   double HY = _data->ec_pcal_hy(0);
