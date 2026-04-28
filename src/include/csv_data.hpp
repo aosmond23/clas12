@@ -81,6 +81,8 @@ struct csv_data {
   int status_Pip;
   int status_Prot;
 
+  inline static bool use_thrown_pid = false;
+
   // Declare the static flag to choose between generated and reconstructed data
   static bool isGenerated;
 

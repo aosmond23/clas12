@@ -53,6 +53,8 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
   std::cout << "=============== " << MAGENTA << "Thread " << thread_id << DEF << " =============== " << BLUE
             << num_of_events << " Events " << DEF << "===============\n";
 
+  std::cout << "PID MODE = " << (csv_data::use_thrown_pid ? "THROWN" : "REC") << std::endl;
+
   // std::cout << "Thread " << thread_id << " processing " << num_of_events << " events on " << std::this_thread::get_id() << std::endl;
 
   // Make a data object which all the branches can be accessed from
@@ -124,18 +126,42 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         auto event = std::make_shared<Reaction>(data, beam_energy, is_rec_data ? "rec" : "exp");
         for (int part = 1; part < data->gpart(); part++) {
           dt->dt_calc(part);
-          if (cuts->IsProton(part)) {
-            event->SetProton(part);
-            statusProt = abs(data->status(part));
-          } else if (cuts->IsPip(part)) {
-            event->SetPip(part);
-            statusPip = abs(data->status(part));
-          } else if (cuts->IsPim(part)) {
-            event->SetPim(part);
-            statusPim = abs(data->status(part));
-          } else {
-            event->SetOther(part);
-          }
+          // if (cuts->IsProton(part)) {
+          //   event->SetProton(part);
+          //   statusProt = abs(data->status(part));
+          // } else if (cuts->IsPip(part)) {
+          //   event->SetPip(part);
+          //   statusPip = abs(data->status(part));
+          // } else if (cuts->IsPim(part)) {
+          //   event->SetPim(part);
+          //   statusPim = abs(data->status(part));
+          // } else {
+          //   event->SetOther(part);
+          // }
+
+            if (csv_data::use_thrown_pid) {
+              // MC truth PID
+              int pid = data->mc_pid(part);
+
+              if (pid == PROTON) {
+                event->SetProton(part);
+              } else if (pid == PIP) {
+                event->SetPip(part);
+              } else if (pid == PIM) {
+                event->SetPim(part);
+              }
+
+            } else {
+              // reconstructed PID (your current logic)
+              if (cuts->IsProton(part)) {
+                event->SetProton(part);
+              } else if (cuts->IsPip(part)) {
+                event->SetPip(part);
+              } else if (cuts->IsPim(part)) {
+                event->SetPim(part);
+              }
+            }
+          // }
         }
         
         double q2_min_analysis = -1.0, q2_max_analysis = 30.0;
