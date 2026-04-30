@@ -6,7 +6,7 @@
 #include <iomanip> // For std::setprecision
 
 struct csv_data {
-  int event;  // Added for event number 
+  // int event;  // Added for event number 
   short electron_sector;
   float sf;
   float w;
@@ -81,7 +81,29 @@ struct csv_data {
   int status_Pip;
   int status_Prot;
 
-  inline static bool use_thrown_pid = false;
+  int pid_prot_rec;
+  int pid_pip_rec;
+  int pid_pim_rec;
+
+  int pid_prot_mc;
+  int pid_pip_mc;
+  int pid_pim_mc;
+
+  int run = 0;
+  int event = 0;
+
+  int mc_run = 0;
+  int mc_event = 0;
+
+  int n_prot_rec = 0;
+  int n_pip_rec = 0;
+  int n_pim_rec = 0;
+
+  int n_prot_mc = 0;
+  int n_pip_mc = 0;
+  int n_pim_mc = 0;
+
+  // inline static bool use_thrown_pid = true;
 
   // Declare the static flag to choose between generated and reconstructed data
   static bool isGenerated;
@@ -102,10 +124,13 @@ struct csv_data {
   static std::string header() {
     if (isGenerated) {
       // ----- Generated -----
-      return "event,w_mc,q2_mc,weight";
+      return "run,event,w_mc,q2_mc,weight,"
+                "pid_prot_mc,pid_pip_mc,pid_pim_mc";
     } else {
       // ----- Reconstructed -----
-      return "event,w,q2,weight,"
+      return "run,event,w,q2,weight,"
+                "pid_prot_rec,pid_pip_rec,pid_pim_rec,"
+                "pid_prot_mc,pid_pip_mc,pid_pim_mc,"
                 "mm2_mPim,mm2_mPip,mm2_mProt,mm2_excl,"
                 "pim_mom_miss,pim_mom_meas,pip_mom_miss,pip_mom_meas,prot_mom_miss,prot_mom_meas,excl_mom,"
                 "pim_theta_miss,pim_theta_meas,pip_theta_miss,pip_theta_meas,prot_theta_miss,prot_theta_meas,"
@@ -118,16 +143,30 @@ struct csv_data {
 
     if (isGenerated) {
       // ----- Generated -----
-      os << data.event << ",";
+      os << data.mc_run << ",";
+      os << data.mc_event << ",";
       os << data.w_mc << ",";
       os << data.q2_mc << ",";
       os << data.weight_gen << ",";
+
+      os << data.pid_prot_mc << ",";
+      os << data.pid_pip_mc << ",";
+      os << data.pid_pim_mc << ",";
     } else {
       // ----- Reconstructed -----
+      os << data.run << ",";
       os << data.event << ",";
       os << data.w << ",";
       os << data.q2 << ",";
       os << data.weight_rec << ",";
+
+      os << data.pid_prot_rec << ",";
+      os << data.pid_pip_rec << ",";
+      os << data.pid_pim_rec << ",";
+
+      os << data.pid_prot_mc << ",";
+      os << data.pid_pip_mc << ",";
+      os << data.pid_pim_mc << ",";
 
       os << data.mm2_mPim << ",";
       os << data.mm2_mPip << ",";

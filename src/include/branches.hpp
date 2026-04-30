@@ -515,6 +515,10 @@ class Branches12 {
   float beta(int i);
   float chi2pid(int i);
   int status(int i);
+
+  int run() { return _run; }
+  int event() { return _NEVENT; }
+
   // DC
   int dc_sec(int i);
   float dc_r1_x(int i);

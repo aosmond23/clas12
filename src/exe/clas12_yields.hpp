@@ -53,7 +53,7 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
   std::cout << "=============== " << MAGENTA << "Thread " << thread_id << DEF << " =============== " << BLUE
             << num_of_events << " Events " << DEF << "===============\n";
 
-  std::cout << "PID MODE = " << (csv_data::use_thrown_pid ? "THROWN" : "REC") << std::endl;
+  // std::cout << "PID MODE = " << (csv_data::use_thrown_pid ? "THROWN" : "REC") << std::endl;
 
   // std::cout << "Thread " << thread_id << " processing " << num_of_events << " events on " << std::this_thread::get_id() << std::endl;
 
@@ -71,6 +71,7 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
   // For each event
   for (size_t current_event = 0; current_event < num_of_events; current_event++) {
     // Get current event
+    // _chain->GetEntry(current_event);
     _chain->GetEntry(current_event);
     
     // If we are the 0th thread print the progress of the thread every 1000 events
@@ -82,23 +83,37 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
     //             << " " << (100 * current_event / num_of_events)
     //             << " %\n";
 
+      // csv_data output;
+
       // ----- Process Generated Data -----
       if (is_gen_data) {
+        csv_data output;
+
+        output.pid_prot_mc = 0;
+        output.pid_pip_mc = 0;
+        output.pid_pim_mc = 0;
         // ----- Generated reaction class -----
         auto mc_event = std::make_shared<MCReaction>(data, beam_energy, "gen");
         for (int part = 1; part < data->mc_npart(); part++) {
+          int mc_pid = data->mc_pid(part);
+
           if (data->mc_pid(part) == PIP) {
             mc_event->SetMCPip(part);
+            output.pid_pip_mc = mc_pid;
           } else if (data->mc_pid(part) == PROTON) {
             mc_event->SetMCProton(part);
+            output.pid_prot_mc = mc_pid;
           } else if (data->mc_pid(part) == PIM) {
             mc_event->SetMCPim(part);
+            output.pid_pim_mc = mc_pid;
           }
         }
 
           // ----- Generated data output -----
-        csv_data output;
-        output.event = current_event;
+        // csv_data output;
+        // output.event = current_event;
+        output.run = data->mc_run();
+        output.event = data->mc_event();
         output.w_mc = mc_event->W_mc();
         output.q2_mc = mc_event->Q2_mc();
         output.weight_gen = mc_event->weight();
@@ -114,6 +129,16 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         int statusProt = -9999;
         float vertex_hadron[3][3];
 
+        csv_data output;
+
+        output.pid_prot_rec = 0;
+        output.pid_pip_rec = 0;
+        output.pid_pim_rec = 0;
+
+        output.pid_prot_mc = 0;
+        output.pid_pip_mc = 0;
+        output.pid_pim_mc = 0;
+
         // Make cuts
         if (is_rec_data && data->mc_npart() < 1) continue;
         auto dt = std::make_shared<Delta_T>(data);
@@ -126,42 +151,34 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         auto event = std::make_shared<Reaction>(data, beam_energy, is_rec_data ? "rec" : "exp");
         for (int part = 1; part < data->gpart(); part++) {
           dt->dt_calc(part);
-          // if (cuts->IsProton(part)) {
-          //   event->SetProton(part);
-          //   statusProt = abs(data->status(part));
-          // } else if (cuts->IsPip(part)) {
-          //   event->SetPip(part);
-          //   statusPip = abs(data->status(part));
-          // } else if (cuts->IsPim(part)) {
-          //   event->SetPim(part);
-          //   statusPim = abs(data->status(part));
-          // } else {
-          //   event->SetOther(part);
-          // }
 
-            if (csv_data::use_thrown_pid) {
-              // MC truth PID
-              int pid = data->mc_pid(part);
+          int rec_pid = data->pid(part);      // reconstructed PID
+          int mc_pid  = data->mc_pid(part);
 
-              if (pid == PROTON) {
-                event->SetProton(part);
-              } else if (pid == PIP) {
-                event->SetPip(part);
-              } else if (pid == PIM) {
-                event->SetPim(part);
-              }
+          if (cuts->IsProton(part)) {
+            event->SetProton(part);
+            output.pid_prot_rec = rec_pid;
+            // output.pid_prot_mc = mc_pid;
+          } else if (cuts->IsPip(part)) {
+            event->SetPip(part);
+            output.pid_pip_rec = rec_pid;
+            // output.pid_pip_mc = mc_pid;
+          } else if (cuts->IsPim(part)) {
+            event->SetPim(part);
+            output.pid_pim_rec = rec_pid;
+            // output.pid_pim_mc = mc_pid;
+          }
 
-            } else {
-              // reconstructed PID (your current logic)
-              if (cuts->IsProton(part)) {
-                event->SetProton(part);
-              } else if (cuts->IsPip(part)) {
-                event->SetPip(part);
-              } else if (cuts->IsPim(part)) {
-                event->SetPim(part);
-              }
-            }
-          // }
+          if (mc_pid == PROTON) {
+            output.pid_prot_mc = mc_pid;
+          }
+          else if (mc_pid == PIP) {
+            output.pid_pip_mc = mc_pid;
+          }
+          else if (mc_pid == PIM) {
+            output.pid_pim_mc = mc_pid;
+          }
+          // need another loop to recMatch (label id perhaps for index number) need PID of index, not proton (like above code is doing)
         }
         
         double q2_min_analysis = -1.0, q2_max_analysis = 30.0;
@@ -212,8 +229,10 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
           
 
             // ----- Reconstructed data output -----
-            csv_data output;
-            output.event = current_event;
+            // csv_data output; // moved this line up
+            // output.event = current_event;
+            output.run = data->run();
+            output.event = data->event();
             output.w = event->W();
             output.q2 = event->Q2();
             output.weight_rec = event->weight(); // * 1e4;
