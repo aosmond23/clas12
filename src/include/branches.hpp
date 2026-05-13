@@ -71,6 +71,13 @@ class Branches12 {
   v_float _mc_vz;
   v_float _mc_vt;
 
+  v_int _gentoRec_mc_pid;
+  v_int _gentoRec_rec_pid;
+  v_int _rectoGen_mc_pid;
+  v_int _rectoGen_rec_pid;
+  v_int _rectoGen_pindex;
+  v_int _rectoGen_mcindex;
+
   v_int _pid;
   v_float _p;
   v_float _p2;
@@ -502,6 +509,8 @@ class Branches12 {
   void init();
   void initMC();
   int gpart();
+  int getRun();
+  int getEvent();
   int pid(int i);
   float p(int i);
   float p2(int i);
@@ -653,6 +662,16 @@ class Branches12 {
   float mc_vy(int i);
   float mc_vz(int i);
   float mc_vt(int i);
+
+  int gentoRec_mc_pid(int i);
+  int gentoRec_rec_pid(int i);
+  int rectoGen_mc_pid(int i);
+  int rectoGen_rec_pid(int i);
+
+  int rectoGen_pindex(int i);
+  int rectoGen_mcindex(int i);
+  int rectoGen_n();
+
   float cvt_x(int i);
   float cvt_y(int i);
   float cvt_z(int i);

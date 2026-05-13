@@ -103,6 +103,14 @@ struct csv_data {
   int n_pip_mc = 0;
   int n_pim_mc = 0;
 
+  int part;
+  int rec_pid;
+  int mc_pid;
+  
+  float px, py, pz;
+  int pid_type;     // prot/pip/pim label
+  int is_misid;
+
   // inline static bool use_thrown_pid = true;
 
   // Declare the static flag to choose between generated and reconstructed data
@@ -128,7 +136,7 @@ struct csv_data {
                 "pid_prot_mc,pid_pip_mc,pid_pim_mc";
     } else {
       // ----- Reconstructed -----
-      return "run,event,w,q2,weight,"
+      return "event,w,q2,weight,"
                 "pid_prot_rec,pid_pip_rec,pid_pim_rec,"
                 "pid_prot_mc,pid_pip_mc,pid_pim_mc,"
                 "mm2_mPim,mm2_mPip,mm2_mProt,mm2_excl,"
@@ -136,6 +144,8 @@ struct csv_data {
                 "pim_theta_miss,pim_theta_meas,pip_theta_miss,pip_theta_meas,prot_theta_miss,prot_theta_meas,"
                 "pim_theta_angle_btwn_P,pip_theta_angle_btwn_P,prot_theta_angle_btwn_P";
     }
+      // return "event, run, part, rec_pid, mc_pid, is_misid, px, py, pz, pid_type";
+    // }
   }
 
   friend std::ostream& operator<<(std::ostream& os, const csv_data& data) {
@@ -154,7 +164,17 @@ struct csv_data {
       os << data.pid_pim_mc << ",";
     } else {
       // ----- Reconstructed -----
-      os << data.run << ",";
+      // os << data.event << ",";
+      // os << data.run << ",";
+      // os << data.part << ",";
+      // os << data.rec_pid << ",";
+      // os << data.mc_pid << ",";
+      // os << data.is_misid << ",";
+      // os << data.px << ",";
+      // os << data.py << ",";
+      // os << data.pz << ",";
+      // os << data.pid_type << ",";
+      // os << data.run << ",";
       os << data.event << ",";
       os << data.w << ",";
       os << data.q2 << ",";

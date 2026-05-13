@@ -325,6 +325,13 @@ void Branches12::initMC() {
   _mc_vz = 0;
   _mc_vt = 0;
 
+  _gentoRec_mc_pid = 0;
+  _gentoRec_rec_pid = 0;
+  _rectoGen_mc_pid = 0;
+  _rectoGen_rec_pid = 0;
+  _rectoGen_pindex = 0;
+  _rectoGen_mcindex = 0;
+
   _tree->SetBranchAddress("mc_helicity", &_mc_helicity);
   _tree->SetBranchAddress("mc_weight", &_mc_weight);
   _tree->SetBranchAddress("mc_npart", &_mc_npart);
@@ -336,7 +343,20 @@ void Branches12::initMC() {
   _tree->SetBranchAddress("mc_vy", &_mc_vy);
   _tree->SetBranchAddress("mc_vz", &_mc_vz);
   _tree->SetBranchAddress("mc_vt", &_mc_vt);
+
+  _tree->SetBranchAddress("gentoRec_mc_pid", &_gentoRec_mc_pid);
+  _tree->SetBranchAddress("gentoRec_rec_pid", &_gentoRec_rec_pid);
+
+  _tree->SetBranchAddress("rectoGen_mc_pid", &_rectoGen_mc_pid);
+  _tree->SetBranchAddress("rectoGen_rec_pid", &_rectoGen_rec_pid);
+
+  _tree->SetBranchAddress("rectoGen_pindex", &_rectoGen_pindex);
+  _tree->SetBranchAddress("rectoGen_mcindex", &_rectoGen_mcindex);
 }
+
+// Add these getter methods
+int Branches12::getRun() { return _run; }
+int Branches12::getEvent() { return _event; }
 
 int Branches12::gpart() { return _pid->size(); }
 int Branches12::pid(int i) {
@@ -760,6 +780,57 @@ float Branches12::mc_vt(int i) {
     return NAN;
   else
     return _mc_vt->at(i);
+}
+
+int Branches12::gentoRec_mc_pid(int i)
+{
+        if (i >= _mc_npart)
+                return -9999;
+        else
+                return _gentoRec_mc_pid->at(i);
+}
+int Branches12::gentoRec_rec_pid(int i)
+{
+        if (i >= _mc_npart)
+                return -9999;
+        else
+                return _gentoRec_rec_pid->at(i);
+}
+
+int Branches12::rectoGen_mc_pid(int i)
+{
+        if (i >= _mc_npart)
+                return -9999;
+        else
+                return _rectoGen_mc_pid->at(i);
+}
+int Branches12::rectoGen_rec_pid(int i)
+{
+        if (i >= _mc_npart)
+                return -9999;
+        else
+                return _rectoGen_rec_pid->at(i);
+}
+
+int Branches12::rectoGen_pindex(int i)
+{
+    if (!_rectoGen_pindex) return -9999;
+    if (i < 0 || i >= _rectoGen_pindex->size()) return -9999;
+    return _rectoGen_pindex->at(i);
+}
+
+// added for pid matching
+int Branches12::rectoGen_n()
+{
+    if (!_rectoGen_pindex) return 0;
+    return _rectoGen_pindex->size();
+}
+
+int Branches12::rectoGen_mcindex(int i)
+{
+    if (!_rectoGen_mcindex) return -9999;
+    if (i < 0 || i >= _rectoGen_mcindex->size()) return -9999;
+    return _rectoGen_mcindex->at(i);
 }
 
 float Branches12::ec_tot_energy(int i) {
