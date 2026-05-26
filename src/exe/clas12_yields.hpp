@@ -248,11 +248,11 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         output.pid_pip_mc  = get_mc_pid(pip_idx);
         output.pid_pim_mc  = get_mc_pid(pim_idx);
 
-        std::cout
-          << "pim_idx = " << pim_idx
-          << " rec_pid = " << output.pid_pim_rec
-          << " mc_pid = " << output.pid_pim_mc
-          << std::endl;
+        // std::cout
+        //   << "pim_idx = " << pim_idx
+        //   << " rec_pid = " << output.pid_pim_rec
+        //   << " mc_pid = " << output.pid_pim_mc
+        //   << std::endl;
               
         double q2_min_analysis = -1.0, q2_max_analysis = 30.0;
         double w_min_analysis = 1.0, w_max_analysis = 2.5;
