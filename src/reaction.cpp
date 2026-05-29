@@ -84,7 +84,17 @@ void Reaction::SetProton(int i) {
   _numProt++;
   _numPos++;
   _hasP = true;
+
+  // auto proton = std::make_unique<TLorentzVector>();
+  _prot = std::make_unique<TLorentzVector>();
+
   _prot->SetXYZM(_data->px(i), _data->py(i), _data->pz(i), MASS_P);
+  // proton->SetXYZM(_data->px(i), _data->py(i), _data->pz(i), MASS_P);
+
+  // _prot.push_back(std::move(proton));
+
+  _prot_indices.clear();
+  _prot_indices.push_back(i);
 
 }
 
@@ -92,7 +102,17 @@ void Reaction::SetPip(int i) {
   _numPip++;
   _numPos++;
   _hasPip = true;
+
+  // auto pip = std::make_unique<TLorentzVector>();
+  _pip = std::make_unique<TLorentzVector>();
+  
   _pip->SetXYZM(_data->px(i), _data->py(i), _data->pz(i), MASS_PIP);
+  // pip->SetXYZM(_data->px(i), _data->py(i), _data->pz(i), MASS_PIP);
+
+  // _pip.push_back(std::move(pip));
+
+  _pip_indices.clear();
+  _pip_indices.push_back(i);
 
 }
 
@@ -100,7 +120,17 @@ void Reaction::SetPim(int i) {
   _numPim++;
   _numNeg++;
   _hasPim = true;
+
+  // auto pim = std::make_unique<TLorentzVector>();
+  _pim = std::make_unique<TLorentzVector>();
+
   _pim->SetXYZM(_data->px(i), _data->py(i), _data->pz(i), MASS_PIM);
+  // pim->SetXYZM(_data->px(i), _data->py(i), _data->pz(i), MASS_PIM);
+
+  // _pim.push_back(std::move(pim));
+
+  _pim_indices.clear();
+  _pim_indices.push_back(i);
 
 }
 

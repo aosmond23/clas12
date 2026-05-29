@@ -13,6 +13,7 @@
 #include "syncfile.hpp"
 #include <unordered_set>
 #include "TLorentzVector.h"
+#include <algorithm>
 
 // Helper function to check if a string contains a substring (case-sensitive)
 bool contains(const std::string& str, const std::string& substr) {
@@ -139,9 +140,9 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         output.pid_pip_mc = 0;
         output.pid_pim_mc = 0;
 
-        int prot_idx = -1;
-        int pip_idx  = -1;
-        int pim_idx  = -1;
+        // int prot_idx = -1;
+        // int pip_idx  = -1;
+        // int pim_idx  = -1;
 
         // Make cuts
         if (is_rec_data && data->mc_npart() < 1) continue;
@@ -153,42 +154,76 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
 
         // ----- Reconstructed reaction class -----
         auto event = std::make_shared<Reaction>(data, beam_energy, is_rec_data ? "rec" : "exp");
+
+        // std::vector<int> proton_candidates;
+        // std::vector<int> pip_candidates;
+        // std::vector<int> pim_candidates;
+
+        std::vector<std::pair<int,double>> proton_score;
+        std::vector<std::pair<int,double>> pip_score;
+        std::vector<std::pair<int,double>> pim_score;
+
         for (int part = 1; part < data->gpart(); part++) {
-          dt->dt_calc(part);
+            dt->dt_calc(part);
 
-          // int rec_pid = data->pid(part);      // reconstructed PID
-          // int mc_pid  = data->mc_pid(part);
+            double p2 =
+                data->px(part)*data->px(part) +
+                data->py(part)*data->py(part) +
+                data->pz(part)*data->pz(part);
 
-          // --------- index matching ---------
-          int rec_pid = data->pid(part);
-          int mc_idx  = data->rectoGen_mcindex(part);
-          int mc_pid = -999;
+            if (cuts->IsProton(part)) {
+                proton_score.emplace_back(part, p2);
+            }
 
-          if (mc_idx >= 0 && mc_idx < data->mc_npart()) {
-              mc_pid = data->mc_pid(mc_idx);
-          }
+            else if (cuts->IsPip(part)) {
+                pip_score.emplace_back(part, p2);
+            }
 
-          if (cuts->IsProton(part)) {
-              event->SetProton(part);
-              prot_idx = part;
+            else if (cuts->IsPim(part)) {
+                pim_score.emplace_back(part, p2);
+            }
+        }
 
-              output.pid_prot_rec = rec_pid;
-              // output.pid_prot_mc  = mc_pid;
-          }
-          else if (cuts->IsPip(part)) {
-              event->SetPip(part);
-              pip_idx = part;
+        // for (int part = 1; part < data->gpart(); part++) {
+        //   dt->dt_calc(part);
 
-              output.pid_pip_rec = rec_pid;
-              // output.pid_pip_mc  = mc_pid;
-          }
-          else if (cuts->IsPim(part)) {
-              event->SetPim(part);
-              pim_idx = part;
+        //   // int rec_pid = data->pid(part);      // reconstructed PID
+        //   // int mc_pid  = data->mc_pid(part);
 
-              output.pid_pim_rec = rec_pid;
-              // output.pid_pim_mc  = mc_pid;
-          }
+        //   // --------- index matching ---------
+        //   int rec_pid = data->pid(part);
+        //   int mc_idx  = data->rectoGen_mcindex(part);
+        //   int mc_pid = -999;
+
+        //   if (mc_idx >= 0 && mc_idx < data->mc_npart()) {
+        //       mc_pid = data->mc_pid(mc_idx);
+        //   }
+
+        //   if (cuts->IsProton(part)) proton_candidates.push_back(part);
+        //   else if (cuts->IsPip(part)) pip_candidates.push_back(part);
+        //   else if (cuts->IsPim(part)) pim_candidates.push_back(part);
+
+          // if (cuts->IsProton(part)) {
+          //     event->SetProton(part);
+          //     // prot_idx = part;
+
+          //     output.pid_prot_rec = rec_pid;
+          //     // output.pid_prot_mc  = mc_pid;
+          // }
+          // else if (cuts->IsPip(part)) {
+          //     event->SetPip(part);
+          //     // pip_idx = part;
+
+          //     output.pid_pip_rec = rec_pid;
+          //     // output.pid_pip_mc  = mc_pid;
+          // }
+          // else if (cuts->IsPim(part)) {
+          //     event->SetPim(part);
+          //     // pim_idx = part;
+
+          //     output.pid_pim_rec = rec_pid;
+          //     // output.pid_pim_mc  = mc_pid;
+          // }
 
           // auto get_mc_pid = [&](int rec_index) {
           //     if (rec_index < 0) return -999;
@@ -230,13 +265,81 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
           //   output.pid_pim_mc = mc_pid;
           // }
           // need another loop to recMatch (label id perhaps for index number) need PID of index, not proton (like above code is doing)
-        }
+        // }
+
+        int prot_idx = -1;
+        int pip_idx  = -1;
+        int pim_idx  = -1;
+
+        auto best = [&](auto &vec) {
+            if (vec.empty()) return -1;
+
+            return std::max_element(
+                vec.begin(),
+                vec.end(),
+                [](auto &a, auto &b) {
+                    return a.second < b.second;
+                }
+            )->first;
+        };
+
+        prot_idx = best(proton_score);
+        pip_idx  = best(pip_score);
+        pim_idx  = best(pim_score);
+
+        // // print statement for which particles are chosen
+        // std::cout << "\n===== EVENT " << data->event() << " =====" << std::endl;
+
+        // if (prot_idx >= 0) {
+        //     double p = std::sqrt(
+        //         data->px(prot_idx)*data->px(prot_idx) +
+        //         data->py(prot_idx)*data->py(prot_idx) +
+        //         data->pz(prot_idx)*data->pz(prot_idx)
+        //     );
+
+        //     std::cout
+        //         << "SELECTED PROTON: index = " << prot_idx
+        //         << " recPID = " << data->pid(prot_idx)
+        //         << " momentum = " << p
+        //         << std::endl;
+        // }
+
+        // if (pip_idx >= 0) {
+        //     double p = std::sqrt(
+        //         data->px(pip_idx)*data->px(pip_idx) +
+        //         data->py(pip_idx)*data->py(pip_idx) +
+        //         data->pz(pip_idx)*data->pz(pip_idx)
+        //     );
+
+        //     std::cout
+        //         << "SELECTED PIP: index = " << pip_idx
+        //         << " recPID = " << data->pid(pip_idx)
+        //         << " momentum = " << p
+        //         << std::endl;
+        // }
+
+        // if (pim_idx >= 0) {
+        //     double p = std::sqrt(
+        //         data->px(pim_idx)*data->px(pim_idx) +
+        //         data->py(pim_idx)*data->py(pim_idx) +
+        //         data->pz(pim_idx)*data->pz(pim_idx)
+        //     );
+
+        //     std::cout
+        //         << "SELECTED PIM: index = " << pim_idx
+        //         << " recPID = " << data->pid(pim_idx)
+        //         << " momentum = " << p
+        //         << std::endl;
+        // }
+
+        if (prot_idx >= 0) event->SetProton(prot_idx);
+        if (pip_idx  >= 0) event->SetPip(pip_idx);
+        if (pim_idx  >= 0) event->SetPim(pim_idx);
 
         auto get_mc_pid = [&](int rec_index) {
             if (rec_index < 0) return -999;
-
             int mc_idx = data->rectoGen_mcindex(rec_index);
-
+            
             if (mc_idx >= 0 && mc_idx < data->mc_npart()) {
                 return data->mc_pid(mc_idx);
             }
@@ -244,9 +347,24 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
             return -999;
         };
 
-        output.pid_prot_mc = get_mc_pid(prot_idx);
-        output.pid_pip_mc  = get_mc_pid(pip_idx);
-        output.pid_pim_mc  = get_mc_pid(pim_idx);
+        if (prot_idx >= 0) {
+            output.pid_prot_rec = data->pid(prot_idx);
+            output.pid_prot_mc  = get_mc_pid(prot_idx);
+        }
+
+        if (pip_idx >= 0) {
+            output.pid_pip_rec = data->pid(pip_idx);
+            output.pid_pip_mc  = get_mc_pid(pip_idx);
+        }
+
+        if (pim_idx >= 0) {
+            output.pid_pim_rec = data->pid(pim_idx);
+            output.pid_pim_mc  = get_mc_pid(pim_idx);
+        }
+
+        // output.pid_prot_mc = get_mc_pid(prot_idx);
+        // output.pid_pip_mc  = get_mc_pid(pip_idx);
+        // output.pid_pim_mc  = get_mc_pid(pim_idx);
 
         // std::cout
         //   << "pim_idx = " << pim_idx

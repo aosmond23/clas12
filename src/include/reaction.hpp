@@ -35,6 +35,13 @@ class Reaction {
   std::unique_ptr<TLorentzVector> _other;
   std::unique_ptr<TLorentzVector> _neutron;
 
+  // std::vector<std::unique_ptr<TLorentzVector>> _prot;
+  // std::vector<std::unique_ptr<TLorentzVector>> _pip;
+  // std::vector<std::unique_ptr<TLorentzVector>> _pim;
+
+  std::vector<int> _prot_indices;
+  std::vector<int> _pip_indices;
+  std::vector<int> _pim_indices;
 
   // bool _mc = false;
   bool is_gen_data = false;
