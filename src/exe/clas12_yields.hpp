@@ -421,9 +421,9 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
 
             // ----- Reconstructed data output -----
             // csv_data output; // moved this line up
-            output.event = current_event;
+            // output.event = current_event;
             // output.run = data->run();
-            // output.event = data->event();
+            output.event = data->event();
             output.w = event->W();
             output.q2 = event->Q2();
             output.weight_rec = event->weight(); // * 1e4;
