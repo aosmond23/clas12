@@ -186,7 +186,7 @@ class Reaction {
   inline bool TwoPion_missingPim() {
     bool _channelTwoPi = true;
     // _channelTwoPi &= ((_numProt == 1 && _numPip == 1) && (_hasE && _hasP  && _hasPip));
-    _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP  && _hasPip));
+    _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip &&!_hasPim));
     return _channelTwoPi;
   }
 
