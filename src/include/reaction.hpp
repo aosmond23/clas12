@@ -40,6 +40,8 @@ class Reaction {
   // std::vector<std::unique_ptr<TLorentzVector>> _pip;
   // std::vector<std::unique_ptr<TLorentzVector>> _pim;
 
+  std::unique_ptr<TLorentzVector> _elecUnSmear;
+
   std::vector<int> _prot_indices;
   std::vector<int> _pip_indices;
   std::vector<int> _pim_indices;
@@ -90,6 +92,11 @@ class Reaction {
   float _prot_status = NAN;
   float _pip_status = NAN; 
   float _pim_status = NAN;
+  float _elec_status = NAN;
+
+  int _sectorElec = -1;
+
+
 
   void SetElec();
 
@@ -317,14 +324,13 @@ class Reaction {
 
   inline bool TwoPion_missingPim() {
     bool _channelTwoPi = true;
-    _channelTwoPi &= ((_numProt == 1 && _numPip == 1) && (_hasE && _hasP  && _hasPip));
-    // _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip &&!_hasPim));
+    // _channelTwoPi &= ((_numProt == 1 && _numPip == 1) && (_hasE && _hasP  && _hasPip));
+    _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip &&!_hasPim));
     return _channelTwoPi;
   }
 
   inline bool TwoPion_exclusive() {
     bool _channelTwoPi_excl = true;
-
     // _channelTwoPi_excl &= ((_numProt == 1 && _numPip == 1 && _numPim == 1) &&
     _channelTwoPi_excl &= ((_numProt >= 1 && _numPip >= 1 && _numPim >= 1) &&
                            (_hasE && _hasP && _hasPip && _hasPim /*&& !_hasNeutron && !_hasOther*/));
@@ -332,17 +338,16 @@ class Reaction {
   }
   inline bool TwoPion_missingPip() {
     bool _channelTwoPi_mpip = true;
-
     _channelTwoPi_mpip &=
         // ((_numProt == 1 && _numPim == 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
-        ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
+        ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim &&!_hasPip /*&& !_hasNeutron && !_hasOther*/));
     return _channelTwoPi_mpip;
   }
   inline bool TwoPion_missingProt() {
     bool _channelTwoPi_mprot = true;
     _channelTwoPi_mprot &=
         // ((_numPip == 1 && _numPim == 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
-        ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
+        ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim &&!_hasP  /*&& !_hasOther*/));
     return _channelTwoPi_mprot;
   }
 

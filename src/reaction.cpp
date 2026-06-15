@@ -19,6 +19,7 @@ Reaction::Reaction(const std::shared_ptr<Branches12> &data, float beam_energy, c
   _gamma = std::make_unique<TLorentzVector>();
   _target = std::make_unique<TLorentzVector>(0.0, 0.0, 0.0, MASS_P);
   _elec = std::make_unique<TLorentzVector>();
+  _elecUnSmear = std::make_unique<TLorentzVector>();
   this->SetElec();
 
   _prot = std::make_unique<TLorentzVector>();
@@ -33,26 +34,101 @@ Reaction::~Reaction() {}
 
 void Reaction::SetElec() {
   _hasE = true;
-  _elec->SetXYZM(_data->px(0), _data->py(0), _data->pz(0), MASS_E);
-  *_gamma += *_beam - *_elec;
-  // // Can calculate W and Q2 here (useful for simulations as sim do not have elec mom corrections)
 
-  _W = physics::W_calc(*_beam, *_elec);
-  _Q2 = physics::Q2_calc(*_beam, *_elec);
+  _sectorElec = _data->dc_sec(0);
+  _elec_status = abs(_data->status(0));
 
-  _emu_prime_mag2 = _elec->M2();
-  _emu_mag2 = _beam->M2();
-  _elec_energy = _elec->E();
+  if (_mc)
+  {
 
-  _elec_mom = _elec->P();
-  _theta_e = _elec->Theta() * 180.0 / PI;
+          _elecUnSmear->SetXYZM(_data->px(0), _data->py(0), _data->pz(0), MASS_E);
 
-  if (_elec->Phi() > 0)
-    _elec_phi = _elec->Phi() * 180 / PI;
-  else if (_elec->Phi() < 0)
-    _elec_phi = (_elec->Phi() + 2 * PI) * 180 / PI;
+          double W_unsmear = physics::W_calc(*_beam, *_elecUnSmear);
 
+          double _pxPrimeSmear, _pyPrimeSmear, _pzPrimeSmear, pUnSmear, thetaUnSmear, phiUnSmear, pSmear, thetaSmear, phiSmear;
+
+          pUnSmear = _elecUnSmear->P();
+
+          thetaUnSmear = _elecUnSmear->Theta() * 180 / PI;
+
+          if (_elecUnSmear->Phi() > 0)
+                  phiUnSmear = _elecUnSmear->Phi() * 180 / PI;
+          else if (_elecUnSmear->Phi() < 0)
+                  phiUnSmear = (_elecUnSmear->Phi() + 2 * PI) * 180 / PI;
+
+          ////////////////////////////////////////////////////////////////
+
+          // Generate new values
+          Reaction::SmearingFunc(ELECTRON, _elec_status, pUnSmear, thetaUnSmear, phiUnSmear, pSmear, thetaSmear, phiSmear);
+
+          _pxPrimeSmear = _elecUnSmear->Px() * ((pSmear) / (pUnSmear)) * sin(DEG2RAD * thetaSmear) /
+                          sin(DEG2RAD * thetaUnSmear) * cos(DEG2RAD * phiSmear) / cos(DEG2RAD * phiUnSmear);
+          _pyPrimeSmear = _elecUnSmear->Py() * ((pSmear) / (pUnSmear)) * sin(DEG2RAD * thetaSmear) /
+                          sin(DEG2RAD * thetaUnSmear) * sin(DEG2RAD * phiSmear) / sin(DEG2RAD * phiUnSmear);
+          _pzPrimeSmear =
+              _elecUnSmear->Pz() * ((pSmear) / (pUnSmear)) * cos(DEG2RAD * thetaSmear) / cos(DEG2RAD * thetaUnSmear);
+
+          // _elecSmear->SetXYZM(_pxPrimeSmear, _pyPrimeSmear, _pzPrimeSmear, MASS_E);  // smeared
+          _elec->SetXYZM(_pxPrimeSmear, _pyPrimeSmear, _pzPrimeSmear, MASS_E); // smeared
+          // _elec->SetXYZM(_data->px(0), _data->py(0), _data->pz(0), MASS_E);  // unsmeared
+
+          *_gamma += *_beam - *_elec; // be careful you are commenting this only to include the momentum correction
+
+          // // // // // Can calculate W and Q2 here (useful for simulations as sim do not have elec mom corrections)
+          _W = physics::W_calc(*_beam, *_elec);
+          _Q2 = physics::Q2_calc(*_beam, *_elec);
+
+          _elec_mom = _elec->P();
+          _elec_energy = _elec->E();
+          _theta_e = _elec->Theta() * 180 / PI;
+
+          // if (_elec->Phi() > 0)
+          //         _phi_elec = _elec->Phi() * 180 / PI;
+          // else if (_elec->Phi() < 0)
+          //         _phi_elec = (_elec->Phi() + 2 * PI) * 180 / PI;
+  }
+  else
+  {
+          // fe = objMomCorr->dppC(_data->px(0), _data->py(0), _data->pz(0), _data->dc_sec(0), 0) + 1;
+          // _elec->SetXYZM(_data->px(0) * fe, _data->py(0) * fe, _data->pz(0) * fe,
+                          // MASS_E); // this is new electron mom corrections aug 2022
+          // _elec->SetXYZM(_data->px(0) * fe, _data->py(0) * fe, _data->pz(0) * fe,
+          //                MASS_E); // elec and mom corr elec are SAME !!!!!
+          _elec->SetXYZM(_data->px(0), _data->py(0), _data->pz(0), MASS_E); // unsmeared
+
+          *_gamma += *_beam - *_elec;
+          _W = physics::W_calc(*_beam, *_elec);
+          _Q2 = physics::Q2_calc(*_beam, *_elec);
+
+          _elec_mom = _elec->P();
+          _elec_energy = _elec->E();
+          _theta_e = _elec->Theta() * 180 / PI;
+  }
 }
+
+// // before adding electron smearing, this was after _hasE
+//   _elec->SetXYZM(_data->px(0), _data->py(0), _data->pz(0), MASS_E);
+//   *_gamma += *_beam - *_elec;
+//   // // Can calculate W and Q2 here (useful for simulations as sim do not have elec mom corrections)
+
+//   _W = physics::W_calc(*_beam, *_elec);
+//   _Q2 = physics::Q2_calc(*_beam, *_elec);
+
+//   _emu_prime_mag2 = _elec->M2();
+//   _emu_mag2 = _beam->M2();
+//   _elec_energy = _elec->E();
+
+//   _elec_mom = _elec->P();
+//   _theta_e = _elec->Theta() * 180.0 / PI;
+
+//   if (_elec->Phi() > 0)
+//     _elec_phi = _elec->Phi() * 180 / PI;
+//   else if (_elec->Phi() < 0)
+//     _elec_phi = (_elec->Phi() + 2 * PI) * 180 / PI;
+
+// }
+
+
 double Reaction::elec_prime_mass2() {
   if (_emu_prime_mag2 != _emu_prime_mag2) SetElec();
 
