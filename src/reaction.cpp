@@ -3,6 +3,12 @@
 
 Reaction::Reaction(const std::shared_ptr<Branches12> &data, float beam_energy, const std::string &data_type)
     : _data(data), _beam_energy(beam_energy), _data_type(data_type) {
+  
+  if (data_type == "rec")
+      _mc = true;
+  else
+      _mc = false;
+      
   _data = data;
   _beam = std::make_unique<TLorentzVector>();
   _beam_energy = beam_energy;
@@ -85,23 +91,67 @@ void Reaction::SetProton(int i) {
   _numPos++;
   _hasP = true;
 
-  // auto proton = std::make_unique<TLorentzVector>();
+  _prot_status = abs(_data->status(i));
+
+  // // auto proton = std::make_unique<TLorentzVector>();
   _prot = std::make_unique<TLorentzVector>();
 
   _prot->SetXYZM(_data->px(i), _data->py(i), _data->pz(i), MASS_P);
-  // proton->SetXYZM(_data->px(i), _data->py(i), _data->pz(i), MASS_P);
+  // // proton->SetXYZM(_data->px(i), _data->py(i), _data->pz(i), MASS_P);
 
-  // _prot.push_back(std::move(proton));
+  // // _prot.push_back(std::move(proton));
 
   _prot_indices.clear();
   _prot_indices.push_back(i);
 
+  // _prot = std::make_unique<TLorentzVector>();
+
+  if (_mc)
+  {
+      // smear ONLY MC reco
+      double pUnSmear = _prot->P();
+      double thetaUnSmear = _prot->Theta() * 180 / PI;
+
+      double phiUnSmear = (_prot->Phi() > 0)
+          ? _prot->Phi() * 180 / PI
+          : (_prot->Phi() + 2 * PI) * 180 / PI;
+
+      double pSmear, thetaSmear, phiSmear;
+
+      SmearingFunc(PROTON, _prot_status,
+                  pUnSmear, thetaUnSmear, phiUnSmear,
+                  pSmear, thetaSmear, phiSmear);
+
+      double px = _prot->Px();
+      double py = _prot->Py();
+      double pz = _prot->Pz();
+
+      double px_s = px * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * cos(DEG2RAD * phiSmear)
+                      / cos(DEG2RAD * phiUnSmear);
+
+      double py_s = py * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * sin(DEG2RAD * phiSmear)
+                      / sin(DEG2RAD * phiUnSmear);
+
+      double pz_s = pz * (pSmear / pUnSmear)
+                      * cos(DEG2RAD * thetaSmear)
+                      / cos(DEG2RAD * thetaUnSmear);
+
+      _prot->SetXYZM(px_s, py_s, pz_s, MASS_P);
+  }
 }
 
 void Reaction::SetPip(int i) {
   _numPip++;
   _numPos++;
   _hasPip = true;
+
+  _pip_status = abs(_data->status(i));
 
   // auto pip = std::make_unique<TLorentzVector>();
   _pip = std::make_unique<TLorentzVector>();
@@ -114,12 +164,52 @@ void Reaction::SetPip(int i) {
   _pip_indices.clear();
   _pip_indices.push_back(i);
 
+  if (_mc)
+  {
+      // smear ONLY MC reco
+      double pUnSmear = _pip->P();
+      double thetaUnSmear = _pip->Theta() * 180 / PI;
+
+      double phiUnSmear = (_pip->Phi() > 0)
+          ? _pip->Phi() * 180 / PI
+          : (_pip->Phi() + 2 * PI) * 180 / PI;
+
+      double pSmear, thetaSmear, phiSmear;
+
+      SmearingFunc(PIP, _pip_status,
+                  pUnSmear, thetaUnSmear, phiUnSmear,
+                  pSmear, thetaSmear, phiSmear);
+
+      double px = _pip->Px();
+      double py = _pip->Py();
+      double pz = _pip->Pz();
+
+      double px_s = px * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * cos(DEG2RAD * phiSmear)
+                      / cos(DEG2RAD * phiUnSmear);
+
+      double py_s = py * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * sin(DEG2RAD * phiSmear)
+                      / sin(DEG2RAD * phiUnSmear);
+
+      double pz_s = pz * (pSmear / pUnSmear)
+                      * cos(DEG2RAD * thetaSmear)
+                      / cos(DEG2RAD * thetaUnSmear);
+
+      _pip->SetXYZM(px_s, py_s, pz_s, MASS_PIP);
+  }
 }
 
 void Reaction::SetPim(int i) {
   _numPim++;
   _numNeg++;
   _hasPim = true;
+
+  _pim_status = abs(_data->status(i));
 
   // auto pim = std::make_unique<TLorentzVector>();
   _pim = std::make_unique<TLorentzVector>();
@@ -132,6 +222,44 @@ void Reaction::SetPim(int i) {
   _pim_indices.clear();
   _pim_indices.push_back(i);
 
+  if (_mc)
+  {
+      // smear ONLY MC reco
+      double pUnSmear = _pim->P();
+      double thetaUnSmear = _pim->Theta() * 180 / PI;
+
+      double phiUnSmear = (_pim->Phi() > 0)
+          ? _pim->Phi() * 180 / PI
+          : (_pim->Phi() + 2 * PI) * 180 / PI;
+
+      double pSmear, thetaSmear, phiSmear;
+
+      SmearingFunc(PIM, _pim_status,
+                  pUnSmear, thetaUnSmear, phiUnSmear,
+                  pSmear, thetaSmear, phiSmear);
+
+      double px = _pim->Px();
+      double py = _pim->Py();
+      double pz = _pim->Pz();
+
+      double px_s = px * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * cos(DEG2RAD * phiSmear)
+                      / cos(DEG2RAD * phiUnSmear);
+
+      double py_s = py * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * sin(DEG2RAD * phiSmear)
+                      / sin(DEG2RAD * phiUnSmear);
+
+      double pz_s = pz * (pSmear / pUnSmear)
+                      * cos(DEG2RAD * thetaSmear)
+                      / cos(DEG2RAD * thetaUnSmear);
+
+      _pim->SetXYZM(px_s, py_s, pz_s, MASS_PIM);
+  }
 }
 
 void Reaction::SetNeutron(int i) {
@@ -558,10 +686,190 @@ void MCReaction::SetMCPip(int i) { _pip_mc->SetXYZM(_data->mc_px(i), _data->mc_p
 
 void MCReaction::SetMCPim(int i) { _pim_mc->SetXYZM(_data->mc_px(i), _data->mc_py(i), _data->mc_pz(i), MASS_PIM); }
 
-// void MCReaction::SetMCOther(int i) {
-//   _other_mc->SetXYZM(_data->mc_px(i), _data->mc_py(i), _data->mc_pz(i),
-//   mass[_data->pid(i)]);
+// void MCReaction::SetMCProton(int i)
+// {
+//     _prot_mc->SetXYZM(_data->mc_px(i),
+//                      _data->mc_py(i),
+//                      _data->mc_pz(i),
+//                      MASS_P);
+
+//     double pUnSmear = _prot_mc->P();
+
+//     double thetaUnSmear =
+//         _prot_mc->Theta()*180.0/PI;
+
+//     double phiUnSmear;
+
+//     if (_prot_mc->Phi() > 0)
+//         phiUnSmear = _prot_mc->Phi()*180.0/PI;
+//     else
+//         phiUnSmear = (_prot_mc->Phi()+2.0*PI)*180.0/PI;
+
+//     double pSmear;
+//     double thetaSmear;
+//     double phiSmear;
+
+//     SmearingFunc(PROTON,
+//                  3000,
+//                  pUnSmear,
+//                  thetaUnSmear,
+//                  phiUnSmear,
+//                  pSmear,
+//                  thetaSmear,
+//                  phiSmear);
+
+//     double pxPrime =
+//         _prot_mc->Px()
+//         * (pSmear/pUnSmear)
+//         * sin(DEG2RAD*thetaSmear)
+//         / sin(DEG2RAD*thetaUnSmear)
+//         * cos(DEG2RAD*phiSmear)
+//         / cos(DEG2RAD*phiUnSmear);
+
+//     double pyPrime =
+//         _prot_mc->Py()
+//         * (pSmear/pUnSmear)
+//         * sin(DEG2RAD*thetaSmear)
+//         / sin(DEG2RAD*thetaUnSmear)
+//         * sin(DEG2RAD*phiSmear)
+//         / sin(DEG2RAD*phiUnSmear);
+
+//     double pzPrime =
+//         _prot_mc->Pz()
+//         * (pSmear/pUnSmear)
+//         * cos(DEG2RAD*thetaSmear)
+//         / cos(DEG2RAD*thetaUnSmear);
+
+//     _prot_mc->SetXYZM(pxPrime,
+//                      pyPrime,
+//                      pzPrime,
+//                      MASS_P);
 // }
+
+// void MCReaction::SetMCPip(int i)
+// {
+//     _pip_mc->SetXYZM(_data->mc_px(i),
+//                      _data->mc_py(i),
+//                      _data->mc_pz(i),
+//                      MASS_PIP);
+
+//     double pUnSmear = _pip_mc->P();
+
+//     double thetaUnSmear =
+//         _pip_mc->Theta()*180.0/PI;
+
+//     double phiUnSmear;
+
+//     if (_pip_mc->Phi() > 0)
+//         phiUnSmear = _pip_mc->Phi()*180.0/PI;
+//     else
+//         phiUnSmear = (_pip_mc->Phi()+2.0*PI)*180.0/PI;
+
+//     double pSmear;
+//     double thetaSmear;
+//     double phiSmear;
+
+//     SmearingFunc(PIP,
+//                  3000,
+//                  pUnSmear,
+//                  thetaUnSmear,
+//                  phiUnSmear,
+//                  pSmear,
+//                  thetaSmear,
+//                  phiSmear);
+
+//     double pxPrime =
+//         _pip_mc->Px()
+//         * (pSmear/pUnSmear)
+//         * sin(DEG2RAD*thetaSmear)
+//         / sin(DEG2RAD*thetaUnSmear)
+//         * cos(DEG2RAD*phiSmear)
+//         / cos(DEG2RAD*phiUnSmear);
+
+//     double pyPrime =
+//         _pip_mc->Py()
+//         * (pSmear/pUnSmear)
+//         * sin(DEG2RAD*thetaSmear)
+//         / sin(DEG2RAD*thetaUnSmear)
+//         * sin(DEG2RAD*phiSmear)
+//         / sin(DEG2RAD*phiUnSmear);
+
+//     double pzPrime =
+//         _pip_mc->Pz()
+//         * (pSmear/pUnSmear)
+//         * cos(DEG2RAD*thetaSmear)
+//         / cos(DEG2RAD*thetaUnSmear);
+
+//     _pip_mc->SetXYZM(pxPrime,
+//                      pyPrime,
+//                      pzPrime,
+//                      MASS_PIP);
+// }
+
+// void MCReaction::SetMCPim(int i)
+// {
+//     _pim_mc->SetXYZM(_data->mc_px(i),
+//                      _data->mc_py(i),
+//                      _data->mc_pz(i),
+//                      MASS_PIM);
+
+//     double pUnSmear = _pim_mc->P();
+
+//     double thetaUnSmear =
+//         _pim_mc->Theta()*180.0/PI;
+
+//     double phiUnSmear;
+
+//     if (_pim_mc->Phi() > 0)
+//         phiUnSmear = _pim_mc->Phi()*180.0/PI;
+//     else
+//         phiUnSmear = (_pim_mc->Phi()+2.0*PI)*180.0/PI;
+
+//     double pSmear;
+//     double thetaSmear;
+//     double phiSmear;
+
+//     SmearingFunc(PIM,
+//                  3000,
+//                  pUnSmear,
+//                  thetaUnSmear,
+//                  phiUnSmear,
+//                  pSmear,
+//                  thetaSmear,
+//                  phiSmear);
+
+//     double pxPrime =
+//         _pim_mc->Px()
+//         * (pSmear/pUnSmear)
+//         * sin(DEG2RAD*thetaSmear)
+//         / sin(DEG2RAD*thetaUnSmear)
+//         * cos(DEG2RAD*phiSmear)
+//         / cos(DEG2RAD*phiUnSmear);
+
+//     double pyPrime =
+//         _pim_mc->Py()
+//         * (pSmear/pUnSmear)
+//         * sin(DEG2RAD*thetaSmear)
+//         / sin(DEG2RAD*thetaUnSmear)
+//         * sin(DEG2RAD*phiSmear)
+//         / sin(DEG2RAD*phiUnSmear);
+
+//     double pzPrime =
+//         _pim_mc->Pz()
+//         * (pSmear/pUnSmear)
+//         * cos(DEG2RAD*thetaSmear)
+//         / cos(DEG2RAD*thetaUnSmear);
+
+//     _pim_mc->SetXYZM(pxPrime,
+//                      pyPrime,
+//                      pzPrime,
+//                      MASS_PIM);
+// }
+
+void MCReaction::SetMCOther(int i) {
+  _other_mc->SetXYZM(_data->mc_px(i), _data->mc_py(i), _data->mc_pz(i),
+  mass[_data->pid(i)]);
+}
 
 float MCReaction::elec_mom_mc_gen() {
   return _elec_mc->P();
