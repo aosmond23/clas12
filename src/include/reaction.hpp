@@ -324,8 +324,8 @@ class Reaction {
 
   inline bool TwoPion_missingPim() {
     bool _channelTwoPi = true;
-    // _channelTwoPi &= ((_numProt == 1 && _numPip == 1) && (_hasE && _hasP  && _hasPip));
-    _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip &&!_hasPim));
+    // _channelTwoPi &= ((_numProt == 1 && _numPip == 1) && (_hasE && _hasP  && _hasPip) && !TwoPion_exclusive());
+    _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip)); // &&!_hasPim));
     return _channelTwoPi;
   }
 
@@ -340,14 +340,14 @@ class Reaction {
     bool _channelTwoPi_mpip = true;
     _channelTwoPi_mpip &=
         // ((_numProt == 1 && _numPim == 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
-        ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim &&!_hasPip /*&& !_hasNeutron && !_hasOther*/));
+        ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
     return _channelTwoPi_mpip;
   }
   inline bool TwoPion_missingProt() {
     bool _channelTwoPi_mprot = true;
     _channelTwoPi_mprot &=
         // ((_numPip == 1 && _numPim == 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
-        ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim &&!_hasP  /*&& !_hasOther*/));
+        ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
     return _channelTwoPi_mprot;
   }
 
