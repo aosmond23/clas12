@@ -25,6 +25,8 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
   // Get the number of events in this thread
   size_t num_of_events = (int)_chain->GetEntries();
 
+  static std::atomic<size_t> event_counter{0};
+
   // Determine the beam energy from the environment variable
   float beam_energy = 10.6;
   if (getenv("BEAM_E") != NULL) beam_energy = atof(getenv("BEAM_E"));
@@ -66,13 +68,17 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
 
 
   // Total number of events "Processed"
-  size_t total = 0;
+  // size_t total = 0;
+  std::atomic<size_t> total{0};
   size_t total_twopion_events = 0;
 
   // For each event
-  for (size_t current_event = 0; current_event < num_of_events; current_event++) {
+  // for (size_t current_event = 0; current_event < num_of_events; current_event++) {
+  size_t current_event;
+
+  while ((current_event = event_counter.fetch_add(1)) < num_of_events) {
+
     // Get current event
-    // _chain->GetEntry(current_event);
     _chain->GetEntry(current_event);
     
     // If we are the 0th thread print the progress of the thread every 1000 events
@@ -120,7 +126,8 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         output.weight_gen = mc_event->weight();
 
         _sync->write(output);
-        total++;  // Increment for all events when processing gen data
+        // total++;  // Increment for all events when processing gen data
+        total.fetch_add(1);
       }
 
       // ----- Process Reconstructed Data -----
@@ -150,7 +157,8 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         auto cuts = std::make_shared<Pass2_Cuts>(data);
         if (!cuts->ElectronCuts()) continue;
         
-        total++;  // Increment only if the event is processed with rec cuts
+        // total++;  // Increment only if the event is processed with rec cuts
+        total.fetch_add(1);
 
         // ----- Reconstructed reaction class -----
         auto event = std::make_shared<Reaction>(data, beam_energy, is_rec_data ? "rec" : "exp");
