@@ -351,6 +351,22 @@ class Reaction {
     return _channelTwoPi_mprot;
   }
 
+  // inline bool TwoPion_exclusive() {
+  //     return (_hasE && _hasP && _hasPip && _hasPim);
+  // }
+
+  // inline bool TwoPion_missingPim() {
+  //     return (_hasE && _hasP && _hasPip && !_hasPim);
+  // }
+
+  // inline bool TwoPion_missingPip() {
+  //     return (_hasE && _hasP && !_hasPip);
+  // }
+
+  // inline bool TwoPion_missingProt() {
+  //     return (_hasE && !_hasP);
+  // }
+
   const TLorentzVector &e_mu() { return *_beam; }
   const TLorentzVector &e_mu_prime() { return *_elec; }
   const TLorentzVector &gamma() { return *_gamma; }
