@@ -25,8 +25,6 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
   // Get the number of events in this thread
   size_t num_of_events = (int)_chain->GetEntries();
 
-  static std::atomic<size_t> event_counter{0};
-
   // Determine the beam energy from the environment variable
   float beam_energy = 10.6;
   if (getenv("BEAM_E") != NULL) beam_energy = atof(getenv("BEAM_E"));
@@ -56,27 +54,23 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
   std::cout << "=============== " << MAGENTA << "Thread " << thread_id << DEF << " =============== " << BLUE
             << num_of_events << " Events " << DEF << "===============\n";
 
-  // std::cout << "PID MODE = " << (csv_data::use_thrown_pid ? "THROWN" : "REC") << std::endl;
-
-  // std::cout << "Thread " << thread_id << " processing " << num_of_events << " events on " << std::this_thread::get_id() << std::endl;
-
   // Make a data object which all the branches can be accessed from
   // auto data = is_gen_data || is_rec_data ? std::make_shared<Branches12>(_chain, true) : std::make_shared<Branches12>(_chain);
   auto data = (is_gen_data || is_rec_data) 
                ? std::make_shared<Branches12>(_chain, true)  // For gen and rec
                : std::make_shared<Branches12>(_chain);       // For exp
 
-
   // Total number of events "Processed"
   // size_t total = 0;
-  std::atomic<size_t> total{0};
-  size_t total_twopion_events = 0;
+  // std::atomic<size_t> total{0};
+  // size_t total_twopion_events = 0;
+
+  static std::atomic<size_t> total_events{0};
+  static std::atomic<size_t> total_twopion_events{0};
 
   // For each event
-  // for (size_t current_event = 0; current_event < num_of_events; current_event++) {
-  size_t current_event;
-
-  while ((current_event = event_counter.fetch_add(1)) < num_of_events) {
+  for (size_t current_event = 0; current_event < num_of_events; current_event++) {
+  // size_t current_event;
 
     // Get current event
     _chain->GetEntry(current_event);
@@ -89,8 +83,6 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
     //   std::cout << "Thread " << thread_id
     //             << " " << (100 * current_event / num_of_events)
     //             << " %\n";
-
-      // csv_data output;
 
       // ----- Process Generated Data -----
       if (is_gen_data) {
@@ -119,15 +111,16 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
           // ----- Generated data output -----
         // csv_data output;
         // output.event = current_event;
-        output.run = data->mc_run();
-        output.event = data->mc_event();
+        output.mc_run = data->mc_run();
+        output.mc_event = data->mc_event();
         output.w_mc = mc_event->W_mc();
         output.q2_mc = mc_event->Q2_mc();
         output.weight_gen = mc_event->weight();
 
         _sync->write(output);
         // total++;  // Increment for all events when processing gen data
-        total.fetch_add(1);
+        // total.fetch_add(1);
+        total_events.fetch_add(1, std::memory_order_relaxed);
       }
 
       // ----- Process Reconstructed Data -----
@@ -158,7 +151,8 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         if (!cuts->ElectronCuts()) continue;
         
         // total++;  // Increment only if the event is processed with rec cuts
-        total.fetch_add(1);
+        // total.fetch_add(1);
+        total_events.fetch_add(1, std::memory_order_relaxed);
 
         // ----- Reconstructed reaction class -----
         auto event = std::make_shared<Reaction>(data, beam_energy, is_rec_data ? "rec" : "exp");
@@ -192,89 +186,6 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
             }
         }
 
-        // for (int part = 1; part < data->gpart(); part++) {
-        //   dt->dt_calc(part);
-
-        //   // int rec_pid = data->pid(part);      // reconstructed PID
-        //   // int mc_pid  = data->mc_pid(part);
-
-        //   // --------- index matching ---------
-        //   int rec_pid = data->pid(part);
-        //   int mc_idx  = data->rectoGen_mcindex(part);
-        //   int mc_pid = -999;
-
-        //   if (mc_idx >= 0 && mc_idx < data->mc_npart()) {
-        //       mc_pid = data->mc_pid(mc_idx);
-        //   }
-
-        //   if (cuts->IsProton(part)) proton_candidates.push_back(part);
-        //   else if (cuts->IsPip(part)) pip_candidates.push_back(part);
-        //   else if (cuts->IsPim(part)) pim_candidates.push_back(part);
-
-          // if (cuts->IsProton(part)) {
-          //     event->SetProton(part);
-          //     // prot_idx = part;
-
-          //     output.pid_prot_rec = rec_pid;
-          //     // output.pid_prot_mc  = mc_pid;
-          // }
-          // else if (cuts->IsPip(part)) {
-          //     event->SetPip(part);
-          //     // pip_idx = part;
-
-          //     output.pid_pip_rec = rec_pid;
-          //     // output.pid_pip_mc  = mc_pid;
-          // }
-          // else if (cuts->IsPim(part)) {
-          //     event->SetPim(part);
-          //     // pim_idx = part;
-
-          //     output.pid_pim_rec = rec_pid;
-          //     // output.pid_pim_mc  = mc_pid;
-          // }
-
-          // auto get_mc_pid = [&](int rec_index) {
-          //     if (rec_index < 0) return -999;
-
-          //     int mc_idx = data->rectoGen_mcindex(rec_index);
-
-          //     if (mc_idx >= 0 && mc_idx < data->mc_npart()) {
-          //         return data->mc_pid(mc_idx);
-          //     }
-
-          //     return -999;
-          // };
-
-          // output.pid_prot_mc = get_mc_pid(prot_idx);
-          // output.pid_pip_mc  = get_mc_pid(pip_idx);
-          // output.pid_pim_mc  = get_mc_pid(pim_idx);
-
-          // if (cuts->IsProton(part)) {
-          //   event->SetProton(part);
-          //   output.pid_prot_rec = rec_pid;
-          //   // output.pid_prot_mc = mc_pid;
-          // } else if (cuts->IsPip(part)) {
-          //   event->SetPip(part);
-          //   output.pid_pip_rec = rec_pid;
-          //   // output.pid_pip_mc = mc_pid;
-          // } else if (cuts->IsPim(part)) {
-          //   event->SetPim(part);
-          //   output.pid_pim_rec = rec_pid;
-          //   // output.pid_pim_mc = mc_pid;
-          // }
-
-          // if (mc_pid == PROTON) {
-          //   output.pid_prot_mc = mc_pid;
-          // }
-          // else if (mc_pid == PIP) {
-          //   output.pid_pip_mc = mc_pid;
-          // }
-          // else if (mc_pid == PIM) {
-          //   output.pid_pim_mc = mc_pid;
-          // }
-          // need another loop to recMatch (label id perhaps for index number) need PID of index, not proton (like above code is doing)
-        // }
-
         int prot_idx = -1;
         int pip_idx  = -1;
         int pim_idx  = -1;
@@ -294,51 +205,6 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         prot_idx = best(proton_score);
         pip_idx  = best(pip_score);
         pim_idx  = best(pim_score);
-
-        // // print statement for which particles are chosen
-        // std::cout << "\n===== EVENT " << data->event() << " =====" << std::endl;
-
-        // if (prot_idx >= 0) {
-        //     double p = std::sqrt(
-        //         data->px(prot_idx)*data->px(prot_idx) +
-        //         data->py(prot_idx)*data->py(prot_idx) +
-        //         data->pz(prot_idx)*data->pz(prot_idx)
-        //     );
-
-        //     std::cout
-        //         << "SELECTED PROTON: index = " << prot_idx
-        //         << " recPID = " << data->pid(prot_idx)
-        //         << " momentum = " << p
-        //         << std::endl;
-        // }
-
-        // if (pip_idx >= 0) {
-        //     double p = std::sqrt(
-        //         data->px(pip_idx)*data->px(pip_idx) +
-        //         data->py(pip_idx)*data->py(pip_idx) +
-        //         data->pz(pip_idx)*data->pz(pip_idx)
-        //     );
-
-        //     std::cout
-        //         << "SELECTED PIP: index = " << pip_idx
-        //         << " recPID = " << data->pid(pip_idx)
-        //         << " momentum = " << p
-        //         << std::endl;
-        // }
-
-        // if (pim_idx >= 0) {
-        //     double p = std::sqrt(
-        //         data->px(pim_idx)*data->px(pim_idx) +
-        //         data->py(pim_idx)*data->py(pim_idx) +
-        //         data->pz(pim_idx)*data->pz(pim_idx)
-        //     );
-
-        //     std::cout
-        //         << "SELECTED PIM: index = " << pim_idx
-        //         << " recPID = " << data->pid(pim_idx)
-        //         << " momentum = " << p
-        //         << std::endl;
-        // }
 
         if (prot_idx >= 0) event->SetProton(prot_idx);
         if (pip_idx  >= 0) event->SetPip(pip_idx);
@@ -369,16 +235,6 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
             output.pid_pim_rec = data->pid(pim_idx);
             output.pid_pim_mc  = get_mc_pid(pim_idx);
         }
-
-        // output.pid_prot_mc = get_mc_pid(prot_idx);
-        // output.pid_pip_mc  = get_mc_pid(pip_idx);
-        // output.pid_pim_mc  = get_mc_pid(pim_idx);
-
-        // std::cout
-        //   << "pim_idx = " << pim_idx
-        //   << " rec_pid = " << output.pid_pim_rec
-        //   << " mc_pid = " << output.pid_pim_mc
-        //   << std::endl;
               
         double q2_min_analysis = -1.0, q2_max_analysis = 30.0;
         double w_min_analysis = 1.0, w_max_analysis = 2.5;
@@ -412,23 +268,10 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
           if (event->W() > w_min_analysis && event->W() < w_max_analysis && 
               event->Q2() > q2_min_analysis && event->Q2() < q2_max_analysis && 
               event->weight() > 0.0) {
-            total_twopion_events++;
-          // }
-        // }
-      // }
-
-        // if ((is_topology_excl && event->TwoPion_exclusive()) ||
-        //     (is_topology_mProt && event->TwoPion_missingProt()) ||
-        //     (is_topology_mPip && event->TwoPion_missingPip()) ||
-        //     (is_topology_mPim && event->TwoPion_missingPim())) {
-        //   if (event->W() > 1.0 && event->W() < 2.5 && event->Q2() > 2.0 && event->Q2() < 30.0 && event->weight() > 0.0) {
-            
-        //     total_twopion_events++;
-
-          
+            // total_twopion_events++;
+            total_twopion_events.fetch_add(1, std::memory_order_relaxed);
 
             // ----- Reconstructed data output -----
-            // csv_data output; // moved this line up
             // output.event = current_event;
             // output.run = data->run();
             output.event = data->event();
@@ -466,9 +309,12 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
       }
     }
 
-    std::cout << "Percent = " << 100.0 * total / num_of_events << std::endl;
-    std::cout << " total no of events = " << total << std::endl;
-    std::cout << " total no of twopion events = " << total_twopion_events << std::endl;
+    // std::cout << "Percent = " << 100.0 * total / num_of_events << std::endl;
+    // std::cout << " total no of events = " << total << std::endl;
+    // std::cout << " total no of twopion events = " << total_twopion_events << std::endl;
+    std::cout << "Percent = " << 100.0 * total_events.load() / num_of_events << std::endl;
+    std::cout << " total no of processed events = " << total_events.load() << std::endl;
+    std::cout << " total no of twopion events = " << total_twopion_events.load() << std::endl;
 
     return num_of_events;
   }

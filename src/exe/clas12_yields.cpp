@@ -50,11 +50,26 @@ int main(int argc, char** argv) {
 
                  // Add every file to the chain
                  for (auto in : inputs) chain->Add(in.c_str());
+
+                 std::cout << "\nTHREAD " << thread_id << std::endl;
+                 std::cout << "FILES ASSIGNED = " << inputs.size() << std::endl;
+
+                 for (const auto& f : inputs) {
+                 std::cout << f << std::endl;
+                 }
+
+                 std::cout << "CHAIN ENTRIES = " << chain->GetEntries() << std::endl;
                                 
                  // Run the function over each thread
                  // return run(chain, csv_output_file, thread_id);
 
                  return run<Pass2_Cuts>(std::move(chain), csv_output_file, thread_id, outfilename); // commented out 9/4/24
+
+                //  std::cout
+                //         << "Thread " << thread_id
+                //         << " files = " << inputs.size()
+                //         << " entries = " << num_of_events
+                //         << std::endl;
 
 
          };
@@ -72,7 +87,17 @@ int main(int argc, char** argv) {
                 // Set the thread to run a task A-Syncroisly
                 // The function we run is the first argument (run_files)
                 // The functions areruments are all the remaining arguments
-                threads[i] = std::async(run_files, infilenames.at(i), i);
+                // threads[i] = std::async(run_files, infilenames.at(i), i);
+                // threads[i] = std::async(std::launch::deferred,
+                //         run_files,
+                //         infilenames.at(i),
+                //         i);
+
+                threads[i] = std::async(
+                        std::launch::async,
+                        run_files,
+                        infilenames.at(i),
+                        i);
         }
 
         // For each thread
@@ -87,11 +112,7 @@ int main(int argc, char** argv) {
         std::cout << RED << elapsed_full.count() << " sec" << DEF << std::endl;
         std::cout << BOLDYELLOW << events / elapsed_full.count() << " Hz" << DEF << std::endl;
 
-        csv_output_file->writeToFile();
-
-        std::chrono::duration<double> elapsed_full_write = (std::chrono::high_resolution_clock::now() - start);
-        std::cout << RED << elapsed_full_write.count() << " sec" << DEF << std::endl;
-        std::cout << BOLDYELLOW << events / elapsed_full_write.count() << " Hz" << DEF << std::endl;
+        // csv_output_file->writeToFile();
 
         return 0;
 }
