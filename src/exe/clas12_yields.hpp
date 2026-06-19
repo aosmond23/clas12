@@ -60,6 +60,8 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
                ? std::make_shared<Branches12>(_chain, true)  // For gen and rec
                : std::make_shared<Branches12>(_chain);       // For exp
 
+  std::cout << "Branches12 constructed for thread "
+            << thread_id << std::endl;
   // Total number of events "Processed"
   // size_t total = 0;
   // std::atomic<size_t> total{0};
@@ -74,6 +76,16 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
 
     // Get current event
     _chain->GetEntry(current_event);
+
+    if (current_event < 10) {
+        std::cout
+            << "event=" << current_event
+            << " gpart=" << data->gpart()
+            << " mc_npart=" << data->mc_npart()
+            << " run=" << data->run()
+            << " event=" << data->event()
+            << std::endl;
+    }
     
     // If we are the 0th thread print the progress of the thread every 1000 events
     if (thread_id == 0 && current_event % 1000 == 0)
@@ -148,6 +160,13 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<SyncFile>& _syn
         if (is_rec_data && data->mc_npart() < 1) continue;
         auto dt = std::make_shared<Delta_T>(data);
         auto cuts = std::make_shared<Pass2_Cuts>(data);
+
+        if (current_event == 0) {
+            std::cout << "ElectronCuts first event = "
+                      << cuts->ElectronCuts()
+                      << std::endl;
+        }
+        
         if (!cuts->ElectronCuts()) continue;
         
         // total++;  // Increment only if the event is processed with rec cuts
