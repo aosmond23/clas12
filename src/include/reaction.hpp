@@ -322,13 +322,43 @@ class Reaction {
   inline short sec() { return _data->dc_sec(0); }
   inline int det() { return abs(_data->status(0) / 1000); }
 
+  // // ----------------------- FOR EXCLUSIVE TOPO -----------------------
+  // inline bool TwoPion_missingPim() {
+  //   bool _channelTwoPi = true;
+  //   // _channelTwoPi &= ((_numProt == 1 && _numPip == 1) && (_hasE && _hasP  && _hasPip) && !TwoPion_exclusive());
+  //   _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip)); // &&!_hasPim));
+  //   return _channelTwoPi;
+  // }
+  // inline bool TwoPion_exclusive() {
+  //   bool _channelTwoPi_excl = true;
+  //   // _channelTwoPi_excl &= ((_numProt == 1 && _numPip == 1 && _numPim == 1) &&
+  //   _channelTwoPi_excl &= ((_numProt >= 1 && _numPip >= 1 && _numPim >= 1) &&
+  //                          (_hasE && _hasP && _hasPip && _hasPim /*&& !_hasNeutron && !_hasOther*/));
+  //   return _channelTwoPi_excl;
+  // }
+  // inline bool TwoPion_missingPip() {
+  //   bool _channelTwoPi_mpip = true;
+  //   _channelTwoPi_mpip &=
+  //       // ((_numProt == 1 && _numPim == 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
+  //       ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
+  //   return _channelTwoPi_mpip;
+  // }
+  // inline bool TwoPion_missingProt() {
+  //   bool _channelTwoPi_mprot = true;
+  //   _channelTwoPi_mprot &=
+  //       // ((_numPip == 1 && _numPim == 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
+  //       ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
+  //   return _channelTwoPi_mprot;
+  // }
+
+// ----------------------- FOR MISSING TOPOS -----------------------
+
   inline bool TwoPion_missingPim() {
     bool _channelTwoPi = true;
     // _channelTwoPi &= ((_numProt == 1 && _numPip == 1) && (_hasE && _hasP  && _hasPip) && !TwoPion_exclusive());
-    _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip)); // &&!_hasPim));
+    _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip &&!_hasPim));
     return _channelTwoPi;
   }
-
   inline bool TwoPion_exclusive() {
     bool _channelTwoPi_excl = true;
     // _channelTwoPi_excl &= ((_numProt == 1 && _numPip == 1 && _numPim == 1) &&
@@ -340,31 +370,43 @@ class Reaction {
     bool _channelTwoPi_mpip = true;
     _channelTwoPi_mpip &=
         // ((_numProt == 1 && _numPim == 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
-        ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
+        ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim &&!_hasPip /*&& !_hasNeutron && !_hasOther*/));
     return _channelTwoPi_mpip;
   }
   inline bool TwoPion_missingProt() {
     bool _channelTwoPi_mprot = true;
     _channelTwoPi_mprot &=
         // ((_numPip == 1 && _numPim == 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
-        ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
+        ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim &&!_hasP  /*&& !_hasOther*/));
     return _channelTwoPi_mprot;
   }
 
   // inline bool TwoPion_exclusive() {
-  //     return (_hasE && _hasP && _hasPip && _hasPim);
-  // }
-
-  // inline bool TwoPion_missingPim() {
-  //     return (_hasE && _hasP && _hasPip && !_hasPim);
-  // }
-
-  // inline bool TwoPion_missingPip() {
-  //     return (_hasE && _hasP && !_hasPip);
+  //   bool _channelTwoPi_excl = true;
+  //   _channelTwoPi_excl &= (_hasE && _hasP && _hasPip && _hasPim &&
+  //           _numProt >= 1 && _numPip  >= 1 && _numPim  >= 1);
+  //   return _channelTwoPi_excl;
   // }
 
   // inline bool TwoPion_missingProt() {
-  //     return (_hasE && !_hasP);
+  //   bool _channelTwoPi_mprot = true;
+  //   _channelTwoPi_mprot &= (_hasE &&
+  //           _numProt < 1 && _numPip  >= 1 && _numPim  >= 1);
+  //   return _channelTwoPi_mprot;
+  // }
+
+  // inline bool TwoPion_missingPip() {
+  //   bool _channelTwoPi_mpip = true;
+  //   _channelTwoPi_mpip &= (_hasE && 
+  //           _numProt >= 1 && _numPip  < 1 && _numPim  >= 1);
+  //   return _channelTwoPi_mpip;
+  // }
+
+  // inline bool TwoPion_missingPim() {
+  //   bool _channelTwoPi_mpim = true;
+  //   _channelTwoPi_mpim &= (_hasE &&
+  //           _numProt >= 1 && _numPip  >= 1 && _numPim  < 1);
+  //   return _channelTwoPi_mpim;
   // }
 
   const TLorentzVector &e_mu() { return *_beam; }
