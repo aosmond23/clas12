@@ -381,34 +381,6 @@ class Reaction {
 //     return _channelTwoPi_mprot;
 //   }
 
-  // inline bool TwoPion_exclusive() {
-  //   bool _channelTwoPi_excl = true;
-  //   _channelTwoPi_excl &= (_hasE && _hasP && _hasPip && _hasPim &&
-  //           _numProt >= 1 && _numPip  >= 1 && _numPim  >= 1);
-  //   return _channelTwoPi_excl;
-  // }
-
-  // inline bool TwoPion_missingProt() {
-  //   bool _channelTwoPi_mprot = true;
-  //   _channelTwoPi_mprot &= (_hasE &&
-  //           _numProt < 1 && _numPip  >= 1 && _numPim  >= 1);
-  //   return _channelTwoPi_mprot;
-  // }
-
-  // inline bool TwoPion_missingPip() {
-  //   bool _channelTwoPi_mpip = true;
-  //   _channelTwoPi_mpip &= (_hasE && 
-  //           _numProt >= 1 && _numPip  < 1 && _numPim  >= 1);
-  //   return _channelTwoPi_mpip;
-  // }
-
-  // inline bool TwoPion_missingPim() {
-  //   bool _channelTwoPi_mpim = true;
-  //   _channelTwoPi_mpim &= (_hasE &&
-  //           _numProt >= 1 && _numPip  >= 1 && _numPim  < 1);
-  //   return _channelTwoPi_mpim;
-  // }
-
   const TLorentzVector &e_mu() { return *_beam; }
   const TLorentzVector &e_mu_prime() { return *_elec; }
   const TLorentzVector &gamma() { return *_gamma; }
