@@ -38,56 +38,56 @@ void Reaction::SetElec() {
   _sectorElec = _data->dc_sec(0);
   _elec_status = abs(_data->status(0));
 
-  // if (_mc)
-  // {
+  if (_mc)
+  {
 
-  //         _elecUnSmear->SetXYZM(_data->px(0), _data->py(0), _data->pz(0), MASS_E);
+          _elecUnSmear->SetXYZM(_data->px(0), _data->py(0), _data->pz(0), MASS_E);
 
-  //         double W_unsmear = physics::W_calc(*_beam, *_elecUnSmear);
+          double W_unsmear = physics::W_calc(*_beam, *_elecUnSmear);
 
-  //         double _pxPrimeSmear, _pyPrimeSmear, _pzPrimeSmear, pUnSmear, thetaUnSmear, phiUnSmear, pSmear, thetaSmear, phiSmear;
+          double _pxPrimeSmear, _pyPrimeSmear, _pzPrimeSmear, pUnSmear, thetaUnSmear, phiUnSmear, pSmear, thetaSmear, phiSmear;
 
-  //         pUnSmear = _elecUnSmear->P();
+          pUnSmear = _elecUnSmear->P();
 
-  //         thetaUnSmear = _elecUnSmear->Theta() * 180 / PI;
+          thetaUnSmear = _elecUnSmear->Theta() * 180 / PI;
 
-  //         if (_elecUnSmear->Phi() > 0)
-  //                 phiUnSmear = _elecUnSmear->Phi() * 180 / PI;
-  //         else if (_elecUnSmear->Phi() < 0)
-  //                 phiUnSmear = (_elecUnSmear->Phi() + 2 * PI) * 180 / PI;
+          if (_elecUnSmear->Phi() > 0)
+                  phiUnSmear = _elecUnSmear->Phi() * 180 / PI;
+          else if (_elecUnSmear->Phi() < 0)
+                  phiUnSmear = (_elecUnSmear->Phi() + 2 * PI) * 180 / PI;
 
-  //         ////////////////////////////////////////////////////////////////
+          ////////////////////////////////////////////////////////////////
 
-  //         // Generate new values
-  //         Reaction::SmearingFunc(ELECTRON, _elec_status, pUnSmear, thetaUnSmear, phiUnSmear, pSmear, thetaSmear, phiSmear);
+          // Generate new values
+          Reaction::SmearingFunc(ELECTRON, _elec_status, pUnSmear, thetaUnSmear, phiUnSmear, pSmear, thetaSmear, phiSmear);
 
-  //         _pxPrimeSmear = _elecUnSmear->Px() * ((pSmear) / (pUnSmear)) * sin(DEG2RAD * thetaSmear) /
-  //                         sin(DEG2RAD * thetaUnSmear) * cos(DEG2RAD * phiSmear) / cos(DEG2RAD * phiUnSmear);
-  //         _pyPrimeSmear = _elecUnSmear->Py() * ((pSmear) / (pUnSmear)) * sin(DEG2RAD * thetaSmear) /
-  //                         sin(DEG2RAD * thetaUnSmear) * sin(DEG2RAD * phiSmear) / sin(DEG2RAD * phiUnSmear);
-  //         _pzPrimeSmear =
-  //             _elecUnSmear->Pz() * ((pSmear) / (pUnSmear)) * cos(DEG2RAD * thetaSmear) / cos(DEG2RAD * thetaUnSmear);
+          _pxPrimeSmear = _elecUnSmear->Px() * ((pSmear) / (pUnSmear)) * sin(DEG2RAD * thetaSmear) /
+                          sin(DEG2RAD * thetaUnSmear) * cos(DEG2RAD * phiSmear) / cos(DEG2RAD * phiUnSmear);
+          _pyPrimeSmear = _elecUnSmear->Py() * ((pSmear) / (pUnSmear)) * sin(DEG2RAD * thetaSmear) /
+                          sin(DEG2RAD * thetaUnSmear) * sin(DEG2RAD * phiSmear) / sin(DEG2RAD * phiUnSmear);
+          _pzPrimeSmear =
+              _elecUnSmear->Pz() * ((pSmear) / (pUnSmear)) * cos(DEG2RAD * thetaSmear) / cos(DEG2RAD * thetaUnSmear);
 
-  //         _elec->SetXYZM(_pxPrimeSmear, _pyPrimeSmear, _pzPrimeSmear, MASS_E); // smeared
-  //         // _elec->SetXYZM(_data->px(0), _data->py(0), _data->pz(0), MASS_E);  // unsmeared
+          _elec->SetXYZM(_pxPrimeSmear, _pyPrimeSmear, _pzPrimeSmear, MASS_E); // smeared
+          // _elec->SetXYZM(_data->px(0), _data->py(0), _data->pz(0), MASS_E);  // unsmeared
 
-  //         *_gamma += *_beam - *_elec; // be careful you are commenting this only to include the momentum correction
+          *_gamma += *_beam - *_elec; // be careful you are commenting this only to include the momentum correction
 
-  //         // // // // // Can calculate W and Q2 here (useful for simulations as sim do not have elec mom corrections)
-  //         _W = physics::W_calc(*_beam, *_elec);
-  //         _Q2 = physics::Q2_calc(*_beam, *_elec);
+          // // // // // Can calculate W and Q2 here (useful for simulations as sim do not have elec mom corrections)
+          _W = physics::W_calc(*_beam, *_elec);
+          _Q2 = physics::Q2_calc(*_beam, *_elec);
 
-  //         _elec_mom = _elec->P();
-  //         _elec_energy = _elec->E();
-  //         _theta_e = _elec->Theta() * 180 / PI;
+          _elec_mom = _elec->P();
+          _elec_energy = _elec->E();
+          _theta_e = _elec->Theta() * 180 / PI;
 
-  //         // if (_elec->Phi() > 0)
-  //         //         _phi_elec = _elec->Phi() * 180 / PI;
-  //         // else if (_elec->Phi() < 0)
-  //         //         _phi_elec = (_elec->Phi() + 2 * PI) * 180 / PI;
-  // }
-  // else
-  // {
+          // if (_elec->Phi() > 0)
+          //         _phi_elec = _elec->Phi() * 180 / PI;
+          // else if (_elec->Phi() < 0)
+          //         _phi_elec = (_elec->Phi() + 2 * PI) * 180 / PI;
+  }
+  else
+  {
           // fe = objMomCorr->dppC(_data->px(0), _data->py(0), _data->pz(0), _data->dc_sec(0), 0) + 1;
           // _elec->SetXYZM(_data->px(0) * fe, _data->py(0) * fe, _data->pz(0) * fe,
                           // MASS_E); // this is new electron mom corrections aug 2022
@@ -102,7 +102,7 @@ void Reaction::SetElec() {
           _elec_mom = _elec->P();
           _elec_energy = _elec->E();
           _theta_e = _elec->Theta() * 180 / PI;
-  // }
+  }
 }
 
 // // before adding electron smearing, this was after _hasE
@@ -181,44 +181,44 @@ void Reaction::SetProton(int i) {
 
   // _prot = std::make_unique<TLorentzVector>();
 
-  // if (_mc)
-  // {
-  //     // smear ONLY MC reco
-  //     double pUnSmear = _prot->P();
-  //     double thetaUnSmear = _prot->Theta() * 180 / PI;
+  if (_mc)
+  {
+      // smear ONLY MC reco
+      double pUnSmear = _prot->P();
+      double thetaUnSmear = _prot->Theta() * 180 / PI;
 
-  //     double phiUnSmear = (_prot->Phi() > 0)
-  //         ? _prot->Phi() * 180 / PI
-  //         : (_prot->Phi() + 2 * PI) * 180 / PI;
+      double phiUnSmear = (_prot->Phi() > 0)
+          ? _prot->Phi() * 180 / PI
+          : (_prot->Phi() + 2 * PI) * 180 / PI;
 
-  //     double pSmear, thetaSmear, phiSmear;
+      double pSmear, thetaSmear, phiSmear;
 
-  //     SmearingFunc(PROTON, _prot_status,
-  //                 pUnSmear, thetaUnSmear, phiUnSmear,
-  //                 pSmear, thetaSmear, phiSmear);
+      SmearingFunc(PROTON, _prot_status,
+                  pUnSmear, thetaUnSmear, phiUnSmear,
+                  pSmear, thetaSmear, phiSmear);
 
-  //     double px = _prot->Px();
-  //     double py = _prot->Py();
-  //     double pz = _prot->Pz();
+      double px = _prot->Px();
+      double py = _prot->Py();
+      double pz = _prot->Pz();
 
-  //     double px_s = px * (pSmear / pUnSmear)
-  //                     * sin(DEG2RAD * thetaSmear)
-  //                     / sin(DEG2RAD * thetaUnSmear)
-  //                     * cos(DEG2RAD * phiSmear)
-  //                     / cos(DEG2RAD * phiUnSmear);
+      double px_s = px * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * cos(DEG2RAD * phiSmear)
+                      / cos(DEG2RAD * phiUnSmear);
 
-  //     double py_s = py * (pSmear / pUnSmear)
-  //                     * sin(DEG2RAD * thetaSmear)
-  //                     / sin(DEG2RAD * thetaUnSmear)
-  //                     * sin(DEG2RAD * phiSmear)
-  //                     / sin(DEG2RAD * phiUnSmear);
+      double py_s = py * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * sin(DEG2RAD * phiSmear)
+                      / sin(DEG2RAD * phiUnSmear);
 
-  //     double pz_s = pz * (pSmear / pUnSmear)
-  //                     * cos(DEG2RAD * thetaSmear)
-  //                     / cos(DEG2RAD * thetaUnSmear);
+      double pz_s = pz * (pSmear / pUnSmear)
+                      * cos(DEG2RAD * thetaSmear)
+                      / cos(DEG2RAD * thetaUnSmear);
 
-  //     _prot->SetXYZM(px_s, py_s, pz_s, MASS_P);
-  // }
+      _prot->SetXYZM(px_s, py_s, pz_s, MASS_P);
+  }
 }
 
 void Reaction::SetPip(int i) {
@@ -239,44 +239,44 @@ void Reaction::SetPip(int i) {
   _pip_indices.clear();
   _pip_indices.push_back(i);
 
-  // if (_mc)
-  // {
-  //     // smear ONLY MC reco
-  //     double pUnSmear = _pip->P();
-  //     double thetaUnSmear = _pip->Theta() * 180 / PI;
+  if (_mc)
+  {
+      // smear ONLY MC reco
+      double pUnSmear = _pip->P();
+      double thetaUnSmear = _pip->Theta() * 180 / PI;
 
-  //     double phiUnSmear = (_pip->Phi() > 0)
-  //         ? _pip->Phi() * 180 / PI
-  //         : (_pip->Phi() + 2 * PI) * 180 / PI;
+      double phiUnSmear = (_pip->Phi() > 0)
+          ? _pip->Phi() * 180 / PI
+          : (_pip->Phi() + 2 * PI) * 180 / PI;
 
-  //     double pSmear, thetaSmear, phiSmear;
+      double pSmear, thetaSmear, phiSmear;
 
-  //     SmearingFunc(PIP, _pip_status,
-  //                 pUnSmear, thetaUnSmear, phiUnSmear,
-  //                 pSmear, thetaSmear, phiSmear);
+      SmearingFunc(PIP, _pip_status,
+                  pUnSmear, thetaUnSmear, phiUnSmear,
+                  pSmear, thetaSmear, phiSmear);
 
-  //     double px = _pip->Px();
-  //     double py = _pip->Py();
-  //     double pz = _pip->Pz();
+      double px = _pip->Px();
+      double py = _pip->Py();
+      double pz = _pip->Pz();
 
-  //     double px_s = px * (pSmear / pUnSmear)
-  //                     * sin(DEG2RAD * thetaSmear)
-  //                     / sin(DEG2RAD * thetaUnSmear)
-  //                     * cos(DEG2RAD * phiSmear)
-  //                     / cos(DEG2RAD * phiUnSmear);
+      double px_s = px * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * cos(DEG2RAD * phiSmear)
+                      / cos(DEG2RAD * phiUnSmear);
 
-  //     double py_s = py * (pSmear / pUnSmear)
-  //                     * sin(DEG2RAD * thetaSmear)
-  //                     / sin(DEG2RAD * thetaUnSmear)
-  //                     * sin(DEG2RAD * phiSmear)
-  //                     / sin(DEG2RAD * phiUnSmear);
+      double py_s = py * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * sin(DEG2RAD * phiSmear)
+                      / sin(DEG2RAD * phiUnSmear);
 
-  //     double pz_s = pz * (pSmear / pUnSmear)
-  //                     * cos(DEG2RAD * thetaSmear)
-  //                     / cos(DEG2RAD * thetaUnSmear);
+      double pz_s = pz * (pSmear / pUnSmear)
+                      * cos(DEG2RAD * thetaSmear)
+                      / cos(DEG2RAD * thetaUnSmear);
 
-  //     _pip->SetXYZM(px_s, py_s, pz_s, MASS_PIP);
-  // }
+      _pip->SetXYZM(px_s, py_s, pz_s, MASS_PIP);
+  }
 }
 
 void Reaction::SetPim(int i) {
@@ -297,44 +297,44 @@ void Reaction::SetPim(int i) {
   _pim_indices.clear();
   _pim_indices.push_back(i);
 
-  // if (_mc)
-  // {
-  //     // smear ONLY MC reco
-  //     double pUnSmear = _pim->P();
-  //     double thetaUnSmear = _pim->Theta() * 180 / PI;
+  if (_mc)
+  {
+      // smear ONLY MC reco
+      double pUnSmear = _pim->P();
+      double thetaUnSmear = _pim->Theta() * 180 / PI;
 
-  //     double phiUnSmear = (_pim->Phi() > 0)
-  //         ? _pim->Phi() * 180 / PI
-  //         : (_pim->Phi() + 2 * PI) * 180 / PI;
+      double phiUnSmear = (_pim->Phi() > 0)
+          ? _pim->Phi() * 180 / PI
+          : (_pim->Phi() + 2 * PI) * 180 / PI;
 
-  //     double pSmear, thetaSmear, phiSmear;
+      double pSmear, thetaSmear, phiSmear;
 
-  //     SmearingFunc(PIM, _pim_status,
-  //                 pUnSmear, thetaUnSmear, phiUnSmear,
-  //                 pSmear, thetaSmear, phiSmear);
+      SmearingFunc(PIM, _pim_status,
+                  pUnSmear, thetaUnSmear, phiUnSmear,
+                  pSmear, thetaSmear, phiSmear);
 
-  //     double px = _pim->Px();
-  //     double py = _pim->Py();
-  //     double pz = _pim->Pz();
+      double px = _pim->Px();
+      double py = _pim->Py();
+      double pz = _pim->Pz();
 
-  //     double px_s = px * (pSmear / pUnSmear)
-  //                     * sin(DEG2RAD * thetaSmear)
-  //                     / sin(DEG2RAD * thetaUnSmear)
-  //                     * cos(DEG2RAD * phiSmear)
-  //                     / cos(DEG2RAD * phiUnSmear);
+      double px_s = px * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * cos(DEG2RAD * phiSmear)
+                      / cos(DEG2RAD * phiUnSmear);
 
-  //     double py_s = py * (pSmear / pUnSmear)
-  //                     * sin(DEG2RAD * thetaSmear)
-  //                     / sin(DEG2RAD * thetaUnSmear)
-  //                     * sin(DEG2RAD * phiSmear)
-  //                     / sin(DEG2RAD * phiUnSmear);
+      double py_s = py * (pSmear / pUnSmear)
+                      * sin(DEG2RAD * thetaSmear)
+                      / sin(DEG2RAD * thetaUnSmear)
+                      * sin(DEG2RAD * phiSmear)
+                      / sin(DEG2RAD * phiUnSmear);
 
-  //     double pz_s = pz * (pSmear / pUnSmear)
-  //                     * cos(DEG2RAD * thetaSmear)
-  //                     / cos(DEG2RAD * thetaUnSmear);
+      double pz_s = pz * (pSmear / pUnSmear)
+                      * cos(DEG2RAD * thetaSmear)
+                      / cos(DEG2RAD * thetaUnSmear);
 
-  //     _pim->SetXYZM(px_s, py_s, pz_s, MASS_PIM);
-  // }
+      _pim->SetXYZM(px_s, py_s, pz_s, MASS_PIM);
+  }
 }
 
 void Reaction::SetNeutron(int i) {
