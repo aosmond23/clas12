@@ -16,8 +16,7 @@ public:
     void Fill(const csv_data& data);
 
 private:
-    // void createGenBranches();
-    // void createRecBranches();
+
     void createBranches();
 
     bool generated;
