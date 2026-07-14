@@ -12,7 +12,8 @@ int main(int argc, char** argv) {
         ROOT::EnableThreadSafety();
 
         // Make sure we don't create more threads than files
-        int NUM_THREADS = 4;
+        // int NUM_THREADS = 4;
+        int NUM_THREADS = 1;
         if (getenv("NUM_THREADS") != NULL) NUM_THREADS = atoi(getenv("NUM_THREADS"));
 
         int num_inputs = argc - 2; // argv[0]=program, argv[1]=output file
@@ -93,6 +94,6 @@ int main(int argc, char** argv) {
         std::chrono::duration<double> elapsed_full = (std::chrono::high_resolution_clock::now() - start);
         std::cout << RED << elapsed_full.count() << " sec" << DEF << std::endl;
         std::cout << BOLDYELLOW << events / elapsed_full.count() << " Hz" << DEF << std::endl;
-        
+
         return 0;
 }
