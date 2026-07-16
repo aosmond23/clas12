@@ -3,6 +3,7 @@
 #include "clas12_root.hpp"
 #include <future>
 #include <thread>
+#include <TFileMerger.h>
 
 // Define the static member
 bool csv_data::isGenerated = true;  // Default to true (Generated data)
@@ -39,10 +40,21 @@ int main(int argc, char** argv) {
 
         bool generated = (outfilename.find("gen") != std::string::npos);
 
-        auto root_output_file = std::make_shared<RootWriter>(outfilename, generated);
+        // auto root_output_file = std::make_shared<RootWriter>(outfilename, generated);
+
+        std::vector<std::shared_ptr<RootWriter>> root_output_files(NUM_THREADS);
+
+        for (int i = 0; i < NUM_THREADS; i++) {
+        std::string thread_filename =
+                outfilename + "_thread" + std::to_string(i) + ".root";
+
+        root_output_files[i] =
+                std::make_shared<RootWriter>(thread_filename, generated);
+        }
 
         // Make your histograms object as a shared pointer that all the threads will have
-        auto run_files = [&root_output_file, &outfilename](std::vector<std::string> inputs, auto&& thread_id) mutable {
+        // auto run_files = [&root_output_file, &outfilename](std::vector<std::string> inputs, auto&& thread_id) mutable {
+        auto run_files = [&root_output_files, &outfilename](std::vector<std::string> inputs, auto&& thread_id) mutable {
                  // Called once for each thread
                  // Make a new chain to process for this thread
                  auto chain = std::make_shared<TChain>("clas12");
@@ -60,7 +72,7 @@ int main(int argc, char** argv) {
                  std::cout << "CHAIN ENTRIES = " << chain->GetEntries() << std::endl;
                                 
                  // Run the function over each thread
-                 return run<Pass2_Cuts>(std::move(chain), root_output_file, thread_id, outfilename); // commented out 9/4/24
+                 return run<Pass2_Cuts>(std::move(chain), root_output_files[thread_id], thread_id, outfilename); // commented out 9/4/24
          };
 
         // Make a set of threads (Futures are special threads which return a value)
@@ -87,6 +99,41 @@ int main(int argc, char** argv) {
         for (size_t i = 0; i < NUM_THREADS; i++) {
                 // Get the information from the thread in this case how many events each thread actually computed
                 events += threads[i].get();
+        }
+
+        // root_output_files.clear();
+        
+        // TFileMerger merger;
+
+        // merger.OutputFile(outfilename.c_str());
+
+        // for (int i = 0; i < NUM_THREADS; i++) {
+
+        //         std::string thread_filename =
+        //                 outfilename + "_thread" + std::to_string(i) + ".root";
+
+        //         merger.AddFile(thread_filename.c_str());
+        // }
+
+        // merger.Merge();
+
+        root_output_files.clear();
+
+        if (NUM_THREADS > 1) {
+                TFileMerger merger;
+                merger.SetFastMethod(true);
+                merger.OutputFile(outfilename.c_str(), true);
+
+                for (int i = 0; i < NUM_THREADS; i++) {
+                        std::string thread_filename =
+                        outfilename + "_thread" + std::to_string(i) + ".root";
+                        merger.AddFile(thread_filename.c_str());
+                }
+
+                merger.Merge();
+        } else {
+                std::string thread_filename = outfilename + "_thread0.root";
+                std::rename(thread_filename.c_str(), outfilename.c_str());
         }
 
         // Timer and Hz calculator functions that print at the end

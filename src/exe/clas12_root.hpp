@@ -74,11 +74,15 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
 
     if (current_event < 10) {
         std::cout
-            << "event=" << current_event
-            << " gpart=" << data->gpart()
-            << " mc_npart=" << data->mc_npart()
-            << " run=" << data->run()
-            << " event=" << data->event()
+            // << "event=" << current_event
+            // << " gpart=" << data->gpart()
+            // << " mc_npart=" << data->mc_npart()
+            // << " run=" << data->run()
+            // << " event=" << data->event()
+
+            << "Thread " << thread_id
+            << " current_event=" << current_event
+            << " data->event()=" << data->event()
             << std::endl;
     }
     

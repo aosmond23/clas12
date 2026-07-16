@@ -6,7 +6,7 @@ RootWriter::RootWriter(const std::string& filename, bool isGenerated)
     generated = isGenerated;
     std::cout << "Constructing RootWriter " << this << std::endl;
     file = new TFile(filename.c_str(),"RECREATE");
-    file->cd();
+    // file->cd();
     tree = new TTree("events","Analysis tree");
     tree->SetDirectory(file);
     createBranches();
@@ -22,12 +22,16 @@ RootWriter::~RootWriter()
     // tree->Write();
     // file->Write();
     file->Close();
+    // delete tree;
     delete file;
+
+    tree = nullptr;
+    file = nullptr;
 }
 
 void RootWriter::Fill(const csv_data& data)
 {
-    buffer = csv_data{};  // 🔥 reset everything
+    // buffer = csv_data{};  // 🔥 reset everything
     buffer = data;
     tree->Fill();
 }
