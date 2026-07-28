@@ -56,7 +56,6 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
             << num_of_events << " Events " << DEF << "===============\n";
 
   // Make a data object which all the branches can be accessed from
-  // auto data = is_gen_data || is_rec_data ? std::make_shared<Branches12>(_chain, true) : std::make_shared<Branches12>(_chain);
   auto data = (is_gen_data || is_rec_data) 
                ? std::make_shared<Branches12>(_chain, true)  // For gen and rec
                : std::make_shared<Branches12>(_chain);       // For exp
@@ -123,8 +122,6 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
         output.weight_gen = mc_event->weight();
 
         _root->Fill(output);
-        // total++;  // Increment for all events when processing gen data
-        // total.fetch_add(1);
         total_events.fetch_add(1, std::memory_order_relaxed);
       }
 
@@ -151,19 +148,17 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
         auto cuts = std::make_shared<Pass2_Cuts>(data);
 
         if (current_event == 0) {
-            std::cout << "ElectronCuts first event = "
-                      << cuts->ElectronCuts()
-                      << std::endl;
+            std::cout << "ElectronCuts first event = " << cuts->ElectronCuts()  << std::endl;
         }
         
         if (!cuts->ElectronCuts()) continue;
         
-        // total++;  // Increment only if the event is processed with rec cuts
-        // total.fetch_add(1);
         total_events.fetch_add(1, std::memory_order_relaxed);
 
         // ----- Reconstructed reaction class -----
         auto event = std::make_shared<Reaction>(data, beam_energy, is_rec_data ? "rec" : "exp");
+
+        event->SetMissingTopologyMode(!is_topology_excl);
 
         std::vector<std::pair<int,double>> proton_score;
         std::vector<std::pair<int,double>> pip_score;

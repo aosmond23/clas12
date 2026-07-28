@@ -51,6 +51,8 @@ class Reaction {
   bool is_rec_data = false;
   bool is_exp_data = false;
 
+  bool _missing_topology_mode = false;
+
   bool _hasE = false;
   bool _hasP = false;
   bool _hasPip = false;
@@ -116,6 +118,10 @@ class Reaction {
       return 1.0;
     }
     return 0.0;
+  }
+
+  inline void SetMissingTopologyMode(bool mode) {
+        _missing_topology_mode = mode;
   }
 
   // ******************** add smearing function here **************************
@@ -322,34 +328,64 @@ class Reaction {
   inline short sec() { return _data->dc_sec(0); }
   inline int det() { return abs(_data->status(0) / 1000); }
 
-  // ----------------------- FOR EXCLUSIVE TOPO -----------------------
   inline bool TwoPion_missingPim() {
-    bool _channelTwoPi = true;
-    // _channelTwoPi &= ((_numProt == 1 && _numPip == 1) && (_hasE && _hasP  && _hasPip) && !TwoPion_exclusive());
-    _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip)); // &&!_hasPim));
-    return _channelTwoPi;
+        bool _channelTwoPi = true;
+        _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip));
+        if (_missing_topology_mode)
+                _channelTwoPi &= !_hasPim;
+        return _channelTwoPi;
   }
+
   inline bool TwoPion_exclusive() {
-    bool _channelTwoPi_excl = true;
-    // _channelTwoPi_excl &= ((_numProt == 1 && _numPip == 1 && _numPim == 1) &&
-    _channelTwoPi_excl &= ((_numProt >= 1 && _numPip >= 1 && _numPim >= 1) &&
-                           (_hasE && _hasP && _hasPip && _hasPim /*&& !_hasNeutron && !_hasOther*/));
-    return _channelTwoPi_excl;
+        bool _channelTwoPi_excl = true;
+        _channelTwoPi_excl &= ((_numProt >= 1 && _numPip  >= 1 && _numPim  >= 1) && (_hasE && _hasP && _hasPip && _hasPim));
+        return _channelTwoPi_excl;
   }
+
   inline bool TwoPion_missingPip() {
-    bool _channelTwoPi_mpip = true;
-    _channelTwoPi_mpip &=
-        // ((_numProt == 1 && _numPim == 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
-        ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
-    return _channelTwoPi_mpip;
+        bool _channelTwoPi_mpip = true;
+        _channelTwoPi_mpip &= ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim));
+        if (_missing_topology_mode)
+                _channelTwoPi_mpip &= !_hasPip;
+        return _channelTwoPi_mpip;
   }
+
   inline bool TwoPion_missingProt() {
-    bool _channelTwoPi_mprot = true;
-    _channelTwoPi_mprot &=
-        // ((_numPip == 1 && _numPim == 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
-        ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
-    return _channelTwoPi_mprot;
+        bool _channelTwoPi_mprot = true;
+        _channelTwoPi_mprot &= ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim));
+        if (_missing_topology_mode)
+                _channelTwoPi_mprot &= !_hasP;
+        return _channelTwoPi_mprot;
   }
+
+// //   // ----------------------- FOR EXCLUSIVE TOPO -----------------------
+// //   inline bool TwoPion_missingPim() {
+// //     bool _channelTwoPi = true;
+// //     // _channelTwoPi &= ((_numProt == 1 && _numPip == 1) && (_hasE && _hasP  && _hasPip) && !TwoPion_exclusive());
+// //     _channelTwoPi &= ((_numProt >= 1 && _numPip >= 1) && (_hasE && _hasP && _hasPip)); // &&!_hasPim));
+// //     return _channelTwoPi;
+// //   }
+// //   inline bool TwoPion_exclusive() {
+// //     bool _channelTwoPi_excl = true;
+// //     // _channelTwoPi_excl &= ((_numProt == 1 && _numPip == 1 && _numPim == 1) &&
+// //     _channelTwoPi_excl &= ((_numProt >= 1 && _numPip >= 1 && _numPim >= 1) &&
+// //                            (_hasE && _hasP && _hasPip && _hasPim /*&& !_hasNeutron && !_hasOther*/));
+// //     return _channelTwoPi_excl;
+// //   }
+// //   inline bool TwoPion_missingPip() {
+// //     bool _channelTwoPi_mpip = true;
+// //     _channelTwoPi_mpip &=
+// //         // ((_numProt == 1 && _numPim == 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
+// //         ((_numProt >= 1 && _numPim >= 1) && (_hasE && _hasP && _hasPim /*&&!_hasPip && !_hasNeutron && !_hasOther*/));
+// //     return _channelTwoPi_mpip;
+// //   }
+// //   inline bool TwoPion_missingProt() {
+// //     bool _channelTwoPi_mprot = true;
+// //     _channelTwoPi_mprot &=
+// //         // ((_numPip == 1 && _numPim == 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
+// //         ((_numPip >= 1 && _numPim >= 1) && (_hasE && _hasPip && _hasPim /*&&!_hasP  && !_hasOther*/));
+// //     return _channelTwoPi_mprot;
+// //   }
 
 // // ----------------------- FOR MISSING TOPOS -----------------------
 
