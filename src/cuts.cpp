@@ -84,7 +84,7 @@ bool Pass2_Cuts::IsPip(int i)
                               dt_cut_fd_down[is_mc][1][2] * pow(_data->p(i), 3) + dt_cut_fd_down[is_mc][1][3] * pow(_data->p(i), 2) +
                               dt_cut_fd_down[is_mc][1][4] * pow(_data->p(i), 1) + dt_cut_fd_down[is_mc][1][5]));
 
-    _pip &= DC_fiducial_cut_XY(i, 2);
+    // _pip &= DC_fiducial_cut_XY(i, 2);
   }
   // }
   else if (abs(_data->status(i)) >= 4000)
@@ -127,7 +127,7 @@ bool Pass2_Cuts::IsProton(int i)
                                 dt_cut_fd_down[is_mc][0][2] * pow(_data->p(i), 3) + dt_cut_fd_down[is_mc][0][3] * pow(_data->p(i), 2) +
                                 dt_cut_fd_down[is_mc][0][4] * pow(_data->p(i), 1) + dt_cut_fd_down[is_mc][0][5]));
 
-    _proton &= DC_fiducial_cut_XY(i, 1);
+    // _proton &= DC_fiducial_cut_XY(i, 1);
   }
   // }
   else if (abs(_data->status(i)) >= 4000)
@@ -201,7 +201,7 @@ bool Pass2_Cuts::ElectronCuts() {
 
   cut &= (_data->p(0) > 1.50);
   // cut &= CC_nphe_cut();
-  cut &= DC_fiducial_cut_XY(0, 0);
+  // cut &= DC_fiducial_cut_XY(0, 0);
   cut &= EC_sampling_fraction_cut();
   cut &= PCAL_minimum_energy();
   cut &= PCAL_fiducial_cut_HX_HY();
@@ -217,7 +217,7 @@ bool Pass2_Cuts::ElectronCuts() {
 //   return (_data->cc_nphe_tot(0) > nphe_min);
 // }
 
-bool Pass2_Cuts::DC_fiducial_cut_XY(int i, int pid)
+// bool Pass2_Cuts::DC_fiducial_cut_XY(int i, int pid)
 {
         bool _dc_fid_cut = true;
         /// supergaus

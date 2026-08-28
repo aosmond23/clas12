@@ -101,22 +101,6 @@ int main(int argc, char** argv) {
                 events += threads[i].get();
         }
 
-        // root_output_files.clear();
-        
-        // TFileMerger merger;
-
-        // merger.OutputFile(outfilename.c_str());
-
-        // for (int i = 0; i < NUM_THREADS; i++) {
-
-        //         std::string thread_filename =
-        //                 outfilename + "_thread" + std::to_string(i) + ".root";
-
-        //         merger.AddFile(thread_filename.c_str());
-        // }
-
-        // merger.Merge();
-
         root_output_files.clear();
 
         if (NUM_THREADS > 1) {
