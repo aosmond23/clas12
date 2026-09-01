@@ -93,7 +93,7 @@ bool Pass2_Cuts::IsPip(int i)
     // _pip &= (_data->p(i) < 1.7);
     _pip &= (_dt->dt_Pi(i) < (dt_cut_cd_up[is_mc][1][0] * pow(_data->p(i), 2) + dt_cut_cd_up[is_mc][1][1] * _data->p(i) + dt_cut_cd_up[is_mc][1][2]));
     _pip &= (_dt->dt_Pi(i) > (dt_cut_cd_down[is_mc][1][0] * pow(_data->p(i), 2) + dt_cut_cd_down[is_mc][1][1] * _data->p(i) + dt_cut_cd_down[is_mc][1][2]));
-    _pip &= CD_fiducial_had(i);
+    // _pip &= CD_fiducial_had(i);
   }
   // _pip &= (_data->p(i) > 0.2);
   _pip &= Hadron_Delta_vz_cut(i);
@@ -137,7 +137,7 @@ bool Pass2_Cuts::IsProton(int i)
     // _proton &= (_data->p(i) < 2.0);
     _proton &= (_dt->dt_P(i) < (dt_cut_cd_up[is_mc][0][0] * pow(_data->p(i), 2) + dt_cut_cd_up[is_mc][0][1] * _data->p(i) + dt_cut_cd_up[is_mc][0][2]));
     _proton &= (_dt->dt_P(i) > (dt_cut_cd_down[is_mc][0][0] * pow(_data->p(i), 2) + dt_cut_cd_down[is_mc][0][1] * _data->p(i) + dt_cut_cd_down[is_mc][0][2]));
-    _proton &= CD_fiducial_had(i);
+    // _proton &= CD_fiducial_had(i);
   }
 
   // _proton &= (_data->p(i) > 0.2);
@@ -204,9 +204,9 @@ bool Pass2_Cuts::ElectronCuts() {
   // cut &= DC_fiducial_cut_XY(0, 0);
   cut &= EC_sampling_fraction_cut();
   cut &= PCAL_minimum_energy();
-  cut &= PCAL_fiducial_cut_HX_HY();
+  // cut &= PCAL_fiducial_cut_HX_HY();
   cut &= DC_z_vertex_cut();
-  cut &= EC_hit_position_fiducial_cut_homogeneous();
+  // cut &= EC_hit_position_fiducial_cut_homogeneous();
 
   return cut;
 }
@@ -381,39 +381,39 @@ bool Pass2_Cuts::PCAL_minimum_energy()
   return (_data->ec_pcal_energy(0) > edep_medium);
 }
 
-bool Pass2_Cuts::PCAL_fiducial_cut_HX_HY()
-{
-  double minparams_pcal_in[6][2] = {{-0.52452, 20.33242}, {-0.51548, 18.38758}, {-0.49609, 19.04455}, {-0.51318, 22.13909}, {-0.50361, 20.48697}, {-0.51821, 19.48394}};
-  double maxparams_pcal_in[6][2] = {{0.52494, -20.38030}, {0.50706, -22.01970}, {0.50900, -21.77000}, {0.51967, -19.31667}, {0.52082, -23.08091}, {0.52288, -20.65061}};
+// bool Pass2_Cuts::PCAL_fiducial_cut_HX_HY()
+// {
+//   double minparams_pcal_in[6][2] = {{-0.52452, 20.33242}, {-0.51548, 18.38758}, {-0.49609, 19.04455}, {-0.51318, 22.13909}, {-0.50361, 20.48697}, {-0.51821, 19.48394}};
+//   double maxparams_pcal_in[6][2] = {{0.52494, -20.38030}, {0.50706, -22.01970}, {0.50900, -21.77000}, {0.51967, -19.31667}, {0.52082, -23.08091}, {0.52288, -20.65061}};
 
-  double min_radius[6] = {71.245, 71.587, 72.142, 73.101, 72.025, 72.921};
+//   double min_radius[6] = {71.245, 71.587, 72.142, 73.101, 72.025, 72.921};
 
-  // short pcal_sector = (_data->ec_pcal_sec(0) - 1);
+//   // short pcal_sector = (_data->ec_pcal_sec(0) - 1);
 
-  int raw_sector = _data->ec_pcal_sec(0);
+//   int raw_sector = _data->ec_pcal_sec(0);
 
-  if (raw_sector <= 0 || raw_sector > 6) {
-      return false;
-  }
+//   if (raw_sector <= 0 || raw_sector > 6) {
+//       return false;
+//   }
 
-  short pcal_sector = raw_sector - 1;
+//   short pcal_sector = raw_sector - 1;
 
-  double HX = _data->ec_pcal_hx(0);
-  double HY = _data->ec_pcal_hy(0);
+//   double HX = _data->ec_pcal_hx(0);
+//   double HY = _data->ec_pcal_hy(0);
 
-  float HX_new = HX * cos(DEG2RAD * (-60 * (pcal_sector))) - HY * sin(DEG2RAD * (-60 * (pcal_sector)));
-  HY = HX * sin(DEG2RAD * (-60 * (pcal_sector))) + HY * cos(DEG2RAD * (-60 * (pcal_sector)));
+//   float HX_new = HX * cos(DEG2RAD * (-60 * (pcal_sector))) - HY * sin(DEG2RAD * (-60 * (pcal_sector)));
+//   HY = HX * sin(DEG2RAD * (-60 * (pcal_sector))) + HY * cos(DEG2RAD * (-60 * (pcal_sector)));
 
-  HX = HX_new;
+//   HX = HX_new;
 
-  double H_radius = sqrt(HX * HX + HY * HY);
-  double Min_radius = min_radius[pcal_sector];
+//   double H_radius = sqrt(HX * HX + HY * HY);
+//   double Min_radius = min_radius[pcal_sector];
 
-  double calc_min = minparams_pcal_in[pcal_sector][0] * HX + minparams_pcal_in[pcal_sector][1];
-  double calc_max = maxparams_pcal_in[pcal_sector][0] * HX + maxparams_pcal_in[pcal_sector][1];
+//   double calc_min = minparams_pcal_in[pcal_sector][0] * HX + minparams_pcal_in[pcal_sector][1];
+//   double calc_max = maxparams_pcal_in[pcal_sector][0] * HX + maxparams_pcal_in[pcal_sector][1];
 
-  return ((HY > calc_min) && (HY < calc_max) && (H_radius > Min_radius));
-}
+//   return ((HY > calc_min) && (HY < calc_max) && (H_radius > Min_radius));
+// }
 
 bool Pass2_Cuts::DC_z_vertex_cut(){
   int pcal_sector = _data->ec_pcal_sec(0);
@@ -438,58 +438,58 @@ bool Pass2_Cuts::DC_z_vertex_cut(){
   return partvz > vz_min && partvz < vz_max;
 }
 
-bool Pass2_Cuts::EC_hit_position_fiducial_cut_homogeneous()
-{
-        // Cut using the natural directions of the scintillator bars/ fibers:
-        double min_v_tight_inb[6] = {19.0, 19.0, 19.0, 19.0, 19.0, 19.0};
-        double min_v_med_inb[6] = {14.0, 14.0, 14.0, 14.0, 14.0, 14.0};
-        double min_v_loose_inb[6] = {9.0, 9.0, 9.0, 9.0, 9.0, 9.0};
+// bool Pass2_Cuts::EC_hit_position_fiducial_cut_homogeneous()
+// {
+//         // Cut using the natural directions of the scintillator bars/ fibers:
+//         double min_v_tight_inb[6] = {19.0, 19.0, 19.0, 19.0, 19.0, 19.0};
+//         double min_v_med_inb[6] = {14.0, 14.0, 14.0, 14.0, 14.0, 14.0};
+//         double min_v_loose_inb[6] = {9.0, 9.0, 9.0, 9.0, 9.0, 9.0};
         
-        double max_v_tight_inb[6] = {400, 400, 400, 400, 400, 400};
-        double max_v_med_inb[6] = {400, 400, 400, 400, 400, 400};
-        double max_v_loose_inb[6] = {400, 400, 400, 400, 400, 400};
+//         double max_v_tight_inb[6] = {400, 400, 400, 400, 400, 400};
+//         double max_v_med_inb[6] = {400, 400, 400, 400, 400, 400};
+//         double max_v_loose_inb[6] = {400, 400, 400, 400, 400, 400};
         
-        double min_w_tight_inb[6] = {19.0, 19.0, 19.0, 19.0, 19.0, 19.0};
-        double min_w_med_inb[6] = {14.0, 14.0, 14.0, 14.0, 14.0, 14.0};
-        double min_w_loose_inb[6] = {9.0, 9.0, 9.0, 9.0, 9.0, 9.0};
+//         double min_w_tight_inb[6] = {19.0, 19.0, 19.0, 19.0, 19.0, 19.0};
+//         double min_w_med_inb[6] = {14.0, 14.0, 14.0, 14.0, 14.0, 14.0};
+//         double min_w_loose_inb[6] = {9.0, 9.0, 9.0, 9.0, 9.0, 9.0};
         
-        double max_w_tight_inb[6] = {400, 400, 400, 400, 400, 400};
-        double max_w_med_inb[6] = {400, 400, 400, 400, 400, 400};
-        double max_w_loose_inb[6] = {400, 400, 400, 400, 400, 400};
+//         double max_w_tight_inb[6] = {400, 400, 400, 400, 400, 400};
+//         double max_w_med_inb[6] = {400, 400, 400, 400, 400, 400};
+//         double max_w_loose_inb[6] = {400, 400, 400, 400, 400, 400};
         
-        int isec = (_data->ec_pcal_sec(0) - 1);
-        double min_v = min_v_med_inb[isec];
-        double max_v = max_v_med_inb[isec];
-        double min_w = min_w_med_inb[isec];
-        double max_w = max_w_med_inb[isec];
-        return (_data->ec_pcal_lv(0) > min_v && _data->ec_pcal_lv(0) < max_v && _data->ec_pcal_lw(0) > min_w &&
-                _data->ec_pcal_lw(0) < max_w);
-}
+//         int isec = (_data->ec_pcal_sec(0) - 1);
+//         double min_v = min_v_med_inb[isec];
+//         double max_v = max_v_med_inb[isec];
+//         double min_w = min_w_med_inb[isec];
+//         double max_w = max_w_med_inb[isec];
+//         return (_data->ec_pcal_lv(0) > min_v && _data->ec_pcal_lv(0) < max_v && _data->ec_pcal_lw(0) > min_w &&
+//                 _data->ec_pcal_lw(0) < max_w);
+// }
 
-bool Pass2_Cuts::CD_fiducial_had(int i)
-{
-  bool pass_fiducial = true;
-  // int pid = _data->pid(i);
-  //        if (pid == 2212)
-  {
-    double momT = sqrt(_data->px(i) * _data->px(i) + _data->py(i) * _data->py(i));
-    double theta = atan2(momT, _data->pz(i)) * 180 / PI;
-    double phi = atan2(_data->py(i), _data->px(i)) * 180 / PI;
+// bool Pass2_Cuts::CD_fiducial_had(int i)
+// {
+//   bool pass_fiducial = true;
+//   // int pid = _data->pid(i);
+//   //        if (pid == 2212)
+//   {
+//     double momT = sqrt(_data->px(i) * _data->px(i) + _data->py(i) * _data->py(i));
+//     double theta = atan2(momT, _data->pz(i)) * 180 / PI;
+//     double phi = atan2(_data->py(i), _data->px(i)) * 180 / PI;
 
-    double fiducial_phi_width = 3; // 3 is used by andrew
-    double fiducial_phi_shift = 0;
-    double fiducial_momT_start = 0.15;
-    double fiducial_phi_central = (-asin(fiducial_momT_start / momT) - (PI / 2)) * 180 / PI;
+//     double fiducial_phi_width = 3; // 3 is used by andrew
+//     double fiducial_phi_shift = 0;
+//     double fiducial_momT_start = 0.15;
+//     double fiducial_phi_central = (-asin(fiducial_momT_start / momT) - (PI / 2)) * 180 / PI;
 
-    if ((fabs(phi - fiducial_phi_central - fiducial_phi_shift) < fiducial_phi_width) ||
-        (fabs(phi - fiducial_phi_central - fiducial_phi_shift - 120) < fiducial_phi_width) ||
-        (fabs(phi - fiducial_phi_central - fiducial_phi_shift - 240) < fiducial_phi_width)) // || (theta < 40) || (theta > 125))
-    {
-      pass_fiducial = false;
-    }
-  }
-  return pass_fiducial;
-}
+//     if ((fabs(phi - fiducial_phi_central - fiducial_phi_shift) < fiducial_phi_width) ||
+//         (fabs(phi - fiducial_phi_central - fiducial_phi_shift - 120) < fiducial_phi_width) ||
+//         (fabs(phi - fiducial_phi_central - fiducial_phi_shift - 240) < fiducial_phi_width)) // || (theta < 40) || (theta > 125))
+//     {
+//       pass_fiducial = false;
+//     }
+//   }
+//   return pass_fiducial;
+// }
 
 // /** Delta VZ cut for hadrons
 //  * @param pid hadron PID code
