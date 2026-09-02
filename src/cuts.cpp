@@ -202,10 +202,10 @@ bool Pass2_Cuts::ElectronCuts() {
   cut &= (_data->p(0) > 1.50);
   // cut &= CC_nphe_cut();
   // cut &= DC_fiducial_cut_XY(0, 0);
-  cut &= EC_sampling_fraction_cut();
-  cut &= PCAL_minimum_energy();
+  // cut &= EC_sampling_fraction_cut();
+  // cut &= PCAL_minimum_energy();
   // cut &= PCAL_fiducial_cut_HX_HY();
-  cut &= DC_z_vertex_cut();
+  // cut &= DC_z_vertex_cut();
   // cut &= EC_hit_position_fiducial_cut_homogeneous();
 
   return cut;
@@ -325,61 +325,61 @@ bool Pass2_Cuts::ElectronCuts() {
 //                 (Y3 < calc_max3) && (DC_r1 > Min_r1) && (DC_r2 > Min_r2) && (DC_r3 > Min_r3));
 // }
 
-bool Pass2_Cuts::EC_sampling_fraction_cut()
-{
-  int isec = (_data->ec_pcal_sec(0) - 1);
-  double upper_lim_total = 0;
-  double lower_lim_total = 0;
-  int is_mc = 0; // manually change this to 1 for sim, 0 for exp until below part works
-  if (is_gen_data)   // having issues with this part of the code but it works otherwise (i think); update: fixed!! 5/14/25
-  {
-    is_mc = 1;
-  }
+// bool Pass2_Cuts::EC_sampling_fraction_cut()
+// {
+//   int isec = (_data->ec_pcal_sec(0) - 1);
+//   double upper_lim_total = 0;
+//   double lower_lim_total = 0;
+//   int is_mc = 0; // manually change this to 1 for sim, 0 for exp until below part works
+//   if (is_gen_data)   // having issues with this part of the code but it works otherwise (i think); update: fixed!! 5/14/25
+//   {
+//     is_mc = 1;
+//   }
 
-  ///// Both  exp data and sim data ////////
-  double mean_minus_3_5_sigma[2][6][3] = {{{-0.0001186, 0.0001892, 0.1942}, {-0.000856, 0.01084, 0.1637}, {-0.001184, 0.014046, 0.1593}, {-0.001268, 0.01918, 0.1287}, {-0.0002744, 0.003532, 0.1844}, {-0.001039, 0.012505, 0.1593}},
-                                          {{-0.00058, 0.00687, 0.19312}, {-0.00088, 0.01022, 0.18360}, {-0.00089, 0.00941, 0.18832}, {-0.00066, 0.00888, 0.18466}, {-0.00066, 0.00798, 0.18884}, {-0.00055, 0.00685, 0.19319}}};
-  double mean_plus_3_5_sigma[2][6][3] = {{{-0.0004027, 0.001746, 0.2903}, {-9.36e-05, -0.000999, 0.2979}, {-0.0003238, 0.00101, 0.2957}, {-4.303e-05, -0.0004702, 0.2954}, {-0.0001818, 0.003223, 0.2742}, {-0.0002906, 0.0015335, 0.2883}},
-                                         {{-0.00002, -0.00078, 0.29991}, {0.00023, -0.00396, 0.31026}, {0.00010, -0.00156, 0.30077}, {0.00017, -0.00400, 0.31052}, {0.00018, -0.00342, 0.30823}, {0.00012, -0.00297, 0.30706}}};
+//   ///// Both  exp data and sim data ////////
+//   double mean_minus_3_5_sigma[2][6][3] = {{{-0.0001186, 0.0001892, 0.1942}, {-0.000856, 0.01084, 0.1637}, {-0.001184, 0.014046, 0.1593}, {-0.001268, 0.01918, 0.1287}, {-0.0002744, 0.003532, 0.1844}, {-0.001039, 0.012505, 0.1593}},
+//                                           {{-0.00058, 0.00687, 0.19312}, {-0.00088, 0.01022, 0.18360}, {-0.00089, 0.00941, 0.18832}, {-0.00066, 0.00888, 0.18466}, {-0.00066, 0.00798, 0.18884}, {-0.00055, 0.00685, 0.19319}}};
+//   double mean_plus_3_5_sigma[2][6][3] = {{{-0.0004027, 0.001746, 0.2903}, {-9.36e-05, -0.000999, 0.2979}, {-0.0003238, 0.00101, 0.2957}, {-4.303e-05, -0.0004702, 0.2954}, {-0.0001818, 0.003223, 0.2742}, {-0.0002906, 0.0015335, 0.2883}},
+//                                          {{-0.00002, -0.00078, 0.29991}, {0.00023, -0.00396, 0.31026}, {0.00010, -0.00156, 0.30077}, {0.00017, -0.00400, 0.31052}, {0.00018, -0.00342, 0.30823}, {0.00012, -0.00297, 0.30706}}};
 
-  for (Int_t k = 0; k < 6; k++)
-  {
-    if (isec == k)
-    {
-      upper_lim_total = mean_plus_3_5_sigma[is_mc][k][0] * pow(_data->p(0), 2) + (mean_plus_3_5_sigma[is_mc][k][1]) * _data->p(0) +
-                        mean_plus_3_5_sigma[is_mc][k][2];
+//   for (Int_t k = 0; k < 6; k++)
+//   {
+//     if (isec == k)
+//     {
+//       upper_lim_total = mean_plus_3_5_sigma[is_mc][k][0] * pow(_data->p(0), 2) + (mean_plus_3_5_sigma[is_mc][k][1]) * _data->p(0) +
+//                         mean_plus_3_5_sigma[is_mc][k][2];
 
-      lower_lim_total = mean_minus_3_5_sigma[is_mc][k][0] * pow(_data->p(0), 2) + (mean_minus_3_5_sigma[is_mc][k][1]) * _data->p(0) +
-                        mean_minus_3_5_sigma[is_mc][k][2];
-    }
-  }
-  bool pass_band = _data->ec_tot_energy(0) / _data->p(0) <= upper_lim_total &&
-                   _data->ec_tot_energy(0) / _data->p(0) >= lower_lim_total;
-  // bool pass_band = true;
-  // bool pass_triangle = false;
+//       lower_lim_total = mean_minus_3_5_sigma[is_mc][k][0] * pow(_data->p(0), 2) + (mean_minus_3_5_sigma[is_mc][k][1]) * _data->p(0) +
+//                         mean_minus_3_5_sigma[is_mc][k][2];
+//     }
+//   }
+//   bool pass_band = _data->ec_tot_energy(0) / _data->p(0) <= upper_lim_total &&
+//                    _data->ec_tot_energy(0) / _data->p(0) >= lower_lim_total;
+//   // bool pass_band = true;
+//   // bool pass_triangle = false;
 
-  // if (_data->p(0) < 4.5)
-  // {
-  //   pass_triangle = true;
-  // }
-  // else
-  // {
-  //   // pass_triangle = (_data->ec_ecin_energy(0) / _data->p(0)) > (0.2 - _data->ec_pcal_energy(0) / _data->p(0));
-  //   pass_triangle = true;
-  // }
+//   // if (_data->p(0) < 4.5)
+//   // {
+//   //   pass_triangle = true;
+//   // }
+//   // else
+//   // {
+//   //   // pass_triangle = (_data->ec_ecin_energy(0) / _data->p(0)) > (0.2 - _data->ec_pcal_energy(0) / _data->p(0));
+//   //   pass_triangle = true;
+//   // }
 
-  if (pass_band) // && pass_triangle)
-    return true;
-  else
-    return false;
-}
+//   if (pass_band) // && pass_triangle)
+//     return true;
+//   else
+//     return false;
+// }
 
-// error with cc_nphe_tot; changed now to ec_pcal_energy
-bool Pass2_Cuts::PCAL_minimum_energy()
-{
-  double edep_tight = 0.06, edep_medium = 0.07, edep_loose = 0.09;
-  return (_data->ec_pcal_energy(0) > edep_medium);
-}
+// // error with cc_nphe_tot; changed now to ec_pcal_energy
+// bool Pass2_Cuts::PCAL_minimum_energy()
+// {
+//   double edep_tight = 0.06, edep_medium = 0.07, edep_loose = 0.09;
+//   return (_data->ec_pcal_energy(0) > edep_medium);
+// }
 
 // bool Pass2_Cuts::PCAL_fiducial_cut_HX_HY()
 // {
@@ -415,28 +415,28 @@ bool Pass2_Cuts::PCAL_minimum_energy()
 //   return ((HY > calc_min) && (HY < calc_max) && (H_radius > Min_radius));
 // }
 
-bool Pass2_Cuts::DC_z_vertex_cut(){
-  int pcal_sector = _data->ec_pcal_sec(0);
-  float partvz = _data->vz(0);
+// bool Pass2_Cuts::DC_z_vertex_cut(){
+//   int pcal_sector = _data->ec_pcal_sec(0);
+//   float partvz = _data->vz(0);
 
-  float vz_min_sect_inb[] = {-10, -10, -10, -10, -10, -10};
-  float vz_max_sect_inb[] = {5, 5, 5, 5, 5, 5};
+//   float vz_min_sect_inb[] = {-10, -10, -10, -10, -10, -10};
+//   float vz_max_sect_inb[] = {5, 5, 5, 5, 5, 5};
 
-  float vz_min_sect[6];
-  float vz_max_sect[6];
+//   float vz_min_sect[6];
+//   float vz_max_sect[6];
 
-  for (int i = 0; i < 6; i++)
-  {
-    vz_min_sect[i] = vz_min_sect_inb[i];
-    vz_max_sect[i] = vz_max_sect_inb[i];
-  }
+//   for (int i = 0; i < 6; i++)
+//   {
+//     vz_min_sect[i] = vz_min_sect_inb[i];
+//     vz_max_sect[i] = vz_max_sect_inb[i];
+//   }
 
-  int isec = pcal_sector - 1;
-  float vz_min = vz_min_sect[isec];
-  float vz_max = vz_max_sect[isec];
+//   int isec = pcal_sector - 1;
+//   float vz_min = vz_min_sect[isec];
+//   float vz_max = vz_max_sect[isec];
 
-  return partvz > vz_min && partvz < vz_max;
-}
+//   return partvz > vz_min && partvz < vz_max;
+// }
 
 // bool Pass2_Cuts::EC_hit_position_fiducial_cut_homogeneous()
 // {
@@ -495,27 +495,27 @@ bool Pass2_Cuts::DC_z_vertex_cut(){
 //  * @param pid hadron PID code
 //  * @param dvz difference between Vz of hadron candidate and electron
 //  */
-bool Pass2_Cuts::Hadron_Delta_vz_cut(int i)
-{
-  int pid = _data->pid(i);
-  float dvz = (_data->vz(i) - _data->vz(0));
-  return dvz > -20 && dvz < 20;
-}
+// bool Pass2_Cuts::Hadron_Delta_vz_cut(int i)
+// {
+//   int pid = _data->pid(i);
+//   float dvz = (_data->vz(i) - _data->vz(0));
+//   return dvz > -20 && dvz < 20;
+// }
 
 // chi2pid cut for hadrons
 
-bool Pass2_Cuts::Hadron_Chi2pid_cut(int i)
-{
-  bool isstrict = false;
-  float chi2pid = _data->chi2pid(i);
-  float p = _data->p(i);
-  int pid = _data->pid(i);
-  int status = abs(_data->status(i));
+// bool Pass2_Cuts::Hadron_Chi2pid_cut(int i)
+// {
+//   bool isstrict = false;
+//   float chi2pid = _data->chi2pid(i);
+//   float p = _data->p(i);
+//   int pid = _data->pid(i);
+//   int status = abs(_data->status(i));
 
-  if (status < 4000)
-    return abs(chi2pid) < 5.0; /// trying very loose cuts
-  else
-  {
-    return abs(chi2pid) < 7.0;
-  }
-}
+//   if (status < 4000)
+//     return abs(chi2pid) < 5.0; /// trying very loose cuts
+//   else
+//   {
+//     return abs(chi2pid) < 7.0;
+//   }
+// }

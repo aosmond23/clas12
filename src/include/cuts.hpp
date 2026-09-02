@@ -36,15 +36,15 @@ class Pass2_Cuts : public Cuts
 
     // bool CC_nphe_cut();
     // bool DC_fiducial_cut_XY(int i, int pid);
-    bool EC_sampling_fraction_cut();
-    bool PCAL_minimum_energy();
-    bool PCAL_fiducial_cut_HX_HY();
-    bool DC_z_vertex_cut();
-    bool EC_hit_position_fiducial_cut_homogeneous();
+    // bool EC_sampling_fraction_cut();
+    // bool PCAL_minimum_energy();
+    // bool PCAL_fiducial_cut_HX_HY();
+    // bool DC_z_vertex_cut();
+    // bool EC_hit_position_fiducial_cut_shomogeneous();
 
-    bool CD_fiducial_had(int i);
-    bool Hadron_Delta_vz_cut(int i);
-    bool Hadron_Chi2pid_cut(int i);
+    // bool CD_fiducial_had(int i);
+    // bool Hadron_Delta_vz_cut(int i);
+    // bool Hadron_Chi2pid_cut(int i);
 
 };
 #endif
