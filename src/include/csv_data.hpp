@@ -1,3 +1,5 @@
+// this is set up for csv outputs but works for root outputs as well. was innitially set up for csv, adapted to additionally work for root in 2026
+
 #ifndef CSV_DATA_H_GUARD
 #define CSV_DATA_H_GUARD
 
