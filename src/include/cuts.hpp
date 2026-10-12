@@ -40,7 +40,7 @@ class Pass2_Cuts : public Cuts
     bool PCAL_minimum_energy();
     bool PCAL_fiducial_cut_HX_HY();
     bool DC_z_vertex_cut();
-    bool EC_hit_position_fiducial_cut_shomogeneous();
+    bool EC_hit_position_fiducial_cut_homogeneous();
 
     // bool CD_fiducial_had(int i);
     bool Hadron_Delta_vz_cut(int i);
