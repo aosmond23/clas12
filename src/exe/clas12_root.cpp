@@ -44,12 +44,21 @@ int main(int argc, char** argv) {
 
         std::vector<std::shared_ptr<RootWriter>> root_output_files(NUM_THREADS);
 
-        for (int i = 0; i < NUM_THREADS; i++) {
-        std::string thread_filename =
-                outfilename + "_thread" + std::to_string(i) + ".root";
+        // for (int i = 0; i < NUM_THREADS; i++) {
+        // std::string thread_filename =
+        //         outfilename + "_thread" + std::to_string(i) + ".root";
 
-        root_output_files[i] =
-                std::make_shared<RootWriter>(thread_filename, generated);
+        // root_output_files[i] =
+        //         std::make_shared<RootWriter>(thread_filename, generated);
+        // }
+
+        for (int i = 0; i < NUM_THREADS; i++) {
+                std::string thread_filename =
+                        outfilename.substr(0, outfilename.rfind(".root"))
+                        + "_thread" + std::to_string(i) + ".root";
+
+                root_output_files[i] =
+                        std::make_shared<RootWriter>(thread_filename, generated);
         }
 
         // Make your histograms object as a shared pointer that all the threads will have
