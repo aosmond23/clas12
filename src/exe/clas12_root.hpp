@@ -24,14 +24,9 @@ bool contains(const std::string& str, const std::string& substr) {
 template <class CutType>
 size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _root, int thread_id, const std::string& output_filename) {
   // Get the number of events in this thread
-  size_t num_of_events = (int)_chain->GetEntries();
-
-  std::cout << "\n========== EVENT COUNT DIAGNOSTICS ==========\n";
-  std::cout << "Thread ID: " << thread_id << "\n";
-  std::cout << "Chain entries: " << _chain->GetEntries() << "\n";
-  std::cout << "num_of_events: " << num_of_events << "\n";
-  std::cout << "Is generated data: " << is_gen_data << "\n";
-  std::cout << "=============================================\n";
+  // size_t num_of_events = (int)_chain->GetEntries();
+  // Get the number of events in this thread
+  size_t num_of_events = _chain->GetEntries();
 
   // Determine the beam energy from the environment variable
   float beam_energy = 10.6;
@@ -41,6 +36,17 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
   bool is_gen_data = contains(output_filename, "gen");
   bool is_rec_data = contains(output_filename, "rec");
   bool is_exp_data = contains(output_filename, "exp");
+
+  // Diagnostic counter for generated events
+  size_t gen_fill_count = 0;
+
+  // Print event count diagnostics
+  std::cout << "\n========== EVENT COUNT DIAGNOSTICS ==========\n";
+  std::cout << "Thread ID: " << thread_id << "\n";
+  std::cout << "Chain entries: " << _chain->GetEntries() << "\n";
+  std::cout << "num_of_events: " << num_of_events << "\n";
+  std::cout << "Is generated data: " << is_gen_data << "\n";
+  std::cout << "=============================================\n";
 
   // Ensure only one data type is selected
   if ((is_gen_data + is_rec_data + is_exp_data) > 1) {
@@ -120,7 +126,7 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
           }
         }
 
-          // ----- Generated data output -----
+        // ----- Generated data output -----
         // output.event = current_event;
         output.mc_run = data->mc_run();
         output.mc_event = data->mc_event();
@@ -128,10 +134,11 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
         output.q2_mc = mc_event->Q2_mc();
         output.weight_gen = mc_event->weight();
 
-        static std::atomic<size_t> gen_fill_count{0};
-        gen_fill_count.fetch_add(1, std::memory_order_relaxed);
+        // static std::atomic<size_t> gen_fill_count{0};
+        // gen_fill_count.fetch_add(1, std::memory_order_relaxed);
 
         _root->Fill(output);
+        ++gen_fill_count;
         total_events.fetch_add(1, std::memory_order_relaxed);
       }
 
@@ -318,9 +325,29 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
       }
     }
 
-    std::cout << "Percent = " << 100.0 * total_events.load() / num_of_events << std::endl;
-    std::cout << " total no of processed events = " << total_events.load() << std::endl;
-    std::cout << " total no of twopion events = " << total_twopion_events.load() << std::endl;
+    // std::cout << "Percent = " << 100.0 * total_events.load() / num_of_events << std::endl;
+    // std::cout << " total no of processed events = " << total_events.load() << std::endl;
+    // std::cout << " total no of twopion events = " << total_twopion_events.load() << std::endl;
+
+    // return num_of_events;
+
+    // Print final event counts
+    std::cout << "\n========== FINAL EVENT COUNTS ==========\n";
+    std::cout << "Thread ID: " << thread_id << std::endl;
+    std::cout << "Total chain entries: " << num_of_events << std::endl;
+    std::cout << "Total no. of processed events: "
+              << total_events.load() << std::endl;
+    std::cout << "Total no. of twopion events: "
+              << total_twopion_events.load() << std::endl;
+    std::cout << "Generated fill count: "
+              << gen_fill_count << std::endl;
+    std::cout << "========================================\n";
+
+    if (num_of_events > 0) {
+        std::cout << "Percent processed = "
+                  << 100.0 * total_events.load() / num_of_events
+                  << "%" << std::endl;
+    }
 
     return num_of_events;
   }
