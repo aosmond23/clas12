@@ -27,7 +27,7 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
   size_t num_of_events = (int)_chain->GetEntries();
 
   std::cout << "\n========== EVENT COUNT DIAGNOSTICS ==========\n";
-  std::cout << "Thread ID: " << *thread_id << "\n";
+  std::cout << "Thread ID: " << thread_id << "\n";
   std::cout << "Chain entries: " << _chain->GetEntries() << "\n";
   std::cout << "num_of_events: " << num_of_events << "\n";
   std::cout << "Is generated data: " << is_gen_data << "\n";
