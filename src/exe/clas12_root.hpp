@@ -26,6 +26,13 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
   // Get the number of events in this thread
   size_t num_of_events = (int)_chain->GetEntries();
 
+  std::cout << "\n========== EVENT COUNT DIAGNOSTICS ==========\n";
+  std::cout << "Thread ID: " << *thread_id << "\n";
+  std::cout << "Chain entries: " << _chain->GetEntries() << "\n";
+  std::cout << "num_of_events: " << num_of_events << "\n";
+  std::cout << "Is generated data: " << is_gen_data << "\n";
+  std::cout << "=============================================\n";
+
   // Determine the beam energy from the environment variable
   float beam_energy = 10.6;
   if (getenv("BEAM_E") != NULL) beam_energy = atof(getenv("BEAM_E"));
@@ -121,9 +128,14 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
         output.q2_mc = mc_event->Q2_mc();
         output.weight_gen = mc_event->weight();
 
+        static std::atomic<size_t> gen_fill_count{0};
+        gen_fill_count.fetch_add(1, std::memory_order_relaxed);
+
         _root->Fill(output);
         total_events.fetch_add(1, std::memory_order_relaxed);
       }
+
+      std::cout << "Generated fill count: " << gen_fill_count.load() << std::endl;
 
       // ----- Process Reconstructed Data -----
       else if (is_rec_data || is_exp_data) {
