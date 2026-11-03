@@ -142,8 +142,6 @@ size_t run(std::shared_ptr<TChain> _chain, const std::shared_ptr<RootWriter>& _r
         total_events.fetch_add(1, std::memory_order_relaxed);
       }
 
-      std::cout << "Generated fill count: " << gen_fill_count.load() << std::endl;
-
       // ----- Process Reconstructed Data -----
       else if (is_rec_data || is_exp_data) {
         int statusPim = -9999;
